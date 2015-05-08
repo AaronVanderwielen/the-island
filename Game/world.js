@@ -138,10 +138,15 @@ var World = (function () {
         }
     };
     World.prototype.render = function (canvas) {
-        var ctx = canvas.getContext("2d");
-        for (var y in this.grid) {
+        var ctx = canvas.getContext("2d"), view = {
+            startY: 0,
+            startX: 0,
+            endY: 1000,
+            endX: 1000
+        };
+        for (var y = view.startY; y < view.endY; y++) {
             var row = this.grid[y];
-            for (var x in row) {
+            for (var x = view.startX; x < view.endX; x++) {
                 var block = row[x];
                 this.renderBlock(block, ctx);
             }
@@ -234,9 +239,4 @@ var World = (function () {
     };
     return World;
 })();
-$(function () {
-    var world = new World(800, 600, 1, 5);
-    world.build();
-    world.render($('#canvas')[0]);
-});
 //# sourceMappingURL=world.js.map

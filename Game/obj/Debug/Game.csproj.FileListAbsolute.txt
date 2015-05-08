@@ -10,3 +10,9 @@ C:\Users\Aaron\Projects\GitHub\battleroyale\Game\bin\Game.pdb
 C:\Users\Aaron\Projects\GitHub\battleroyale\Game\obj\Debug\Game.csprojResolveAssemblyReference.cache
 C:\Users\Aaron\Projects\GitHub\battleroyale\Game\obj\Debug\Game.dll
 C:\Users\Aaron\Projects\GitHub\battleroyale\Game\obj\Debug\Game.pdb
+C:\Users\avanderwielen\GitHub\battleroyale\Game\bin\Game.dll.config
+C:\Users\avanderwielen\GitHub\battleroyale\Game\bin\Game.dll
+C:\Users\avanderwielen\GitHub\battleroyale\Game\bin\Game.pdb
+C:\Users\avanderwielen\GitHub\battleroyale\Game\obj\Debug\Game.csprojResolveAssemblyReference.cache
+C:\Users\avanderwielen\GitHub\battleroyale\Game\obj\Debug\Game.dll
+C:\Users\avanderwielen\GitHub\battleroyale\Game\obj\Debug\Game.pdb

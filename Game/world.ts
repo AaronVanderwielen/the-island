@@ -20,15 +20,17 @@ enum TerrainType {
 
 class World {
     grid: Array<Array<Block>>;
+    sectionSize: number;
     numX: number;
     numY: number;
     tileSize: number;
     gradientSize: number;
     terrainType: TerrainType;
 
-    constructor(x, y, tileSize, gradientSize) {
+    constructor(x, y, sectionSize, tileSize, gradientSize) {
         this.numX = x;
         this.numY = y;
+        this.sectionSize = sectionSize;
         this.tileSize = tileSize;
         this.gradientSize = gradientSize;
 
@@ -195,11 +197,18 @@ class World {
     }
 
     render(canvas: HTMLCanvasElement) {
-        var ctx = canvas.getContext("2d");
-        for (var y in this.grid) {
+        var ctx = canvas.getContext("2d"),
+            view = {
+                startY: 0,
+                startX: 0,
+                endY: 1000,
+                endX: 1000
+            };
+
+        for (var y = view.startY; y < view.endY; y++) {
             var row = this.grid[y];
 
-            for (var x in row) {
+            for (var x = view.startX; x < view.endX; x++) {
                 var block = row[x];
                 this.renderBlock(block, ctx);
             }
@@ -312,9 +321,3 @@ class World {
             block.left.type === TerrainType.grass;
     }
 }
-
-$(function () {
-    var world = new World(800, 600, 1, 5);
-    world.build();
-    world.render((<HTMLCanvasElement>$('#canvas')[0]));
-});

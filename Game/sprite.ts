@@ -52,7 +52,6 @@
                     ctx.drawImage(charset, offsetx, offsety, obj.width, obj.height, 0, 0, obj.width, obj.height);
                     splicedImg.src = canvas.toDataURL('image/png');
                     charsetData[y][x] = splicedImg;
-                    $('body').append(splicedImg);
                 }
             }
             callback(charsetData);
