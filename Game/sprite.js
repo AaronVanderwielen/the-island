@@ -1,6 +1,7 @@
 var Sprite = (function () {
-    function Sprite(charPath) {
+    function Sprite(charPath, world) {
         var sprite = this;
+        sprite.world = world;
         sprite.height = 96;
         sprite.width = 72;
         sprite.set = null;
@@ -35,6 +36,9 @@ var Sprite = (function () {
         charset.src = filename;
     };
     Sprite.prototype.move = function (x, y, strength) {
+        var nextX = this.x + (x * strength * 2), nextY = this.y + (y * strength * 2), nextBlock = this.world.getBlock(nextX, nextY);
+        if (nextBlock.type === TerrainType.ocean || nextBlock.type === TerrainType.mountain)
+            return;
         if (this.stepCounter >= 40)
             this.stepDir = -strength;
         else if (this.stepCounter <= 0)
@@ -42,8 +46,8 @@ var Sprite = (function () {
         this.stepCounter += this.stepDir;
         this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
         this.currStep = this.stepCounter < 10 ? 0 : this.stepCounter > 30 ? 2 : 1;
-        this.x += (x * strength * 2);
-        this.y += (y * strength * 2);
+        this.x = nextX;
+        this.y = nextY;
     };
     Sprite.prototype.draw = function (ctx) {
         ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height, this.x, this.y, this.width, this.height);

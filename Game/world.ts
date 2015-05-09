@@ -1,4 +1,10 @@
-﻿interface Block {
+﻿interface Section {
+    x: number;
+    y: number;
+    canvas: HTMLCanvasElement;
+}
+
+interface Block {
     x: number;
     y: number;
     type?: TerrainType;
@@ -20,6 +26,7 @@ enum TerrainType {
 
 class World {
     grid: Array<Array<Block>>;
+    cached: Array<Section>;
     sectionSize: number;
     numX: number;
     numY: number;
@@ -196,6 +203,9 @@ class World {
         }
     }
 
+    loadSection(x, y) {
+    }
+
     render(canvas: HTMLCanvasElement) {
         var ctx = canvas.getContext("2d"),
             view = {
@@ -205,6 +215,9 @@ class World {
                 endX: 1000
             };
 
+        // cache nearby sections
+
+        // render blocks for viewport
         for (var y = view.startY; y < view.endY; y++) {
             var row = this.grid[y];
 
@@ -221,6 +234,10 @@ class World {
 
         // Draw a square using the fillRect() method and fill it with the colour specified by the fillStyle attribute
         ctx.fillRect(block.x * this.tileSize, block.y * this.tileSize, this.tileSize, this.tileSize);       
+    }
+
+    getBlock(x: number, y: number) {
+        return this.grid[y / this.tileSize][x / this.tileSize];
     }
 
     setNearbyPointers(block) {

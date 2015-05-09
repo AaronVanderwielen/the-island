@@ -10,18 +10,26 @@
 }
 
 class Game {
-    canvas: HTMLCanvasElement;
-    ctx: CanvasRenderingContext2D;
+    bgCanvas: HTMLCanvasElement;
+    bgCtx: CanvasRenderingContext2D;
+    oCanvas: HTMLCanvasElement;
+    oCtx: CanvasRenderingContext2D;
     fps: number;
     objects: Array<IMapObject>;
     userControlled: Sprite;
     controls: Controls;
 
-    constructor(element: HTMLCanvasElement, fps: number) {
-        this.canvas = element;
-        this.canvas.width = 1920;
-        this.canvas.height = 1080;
-        this.ctx = element.getContext('2d');
+    constructor(bgCanvas: HTMLCanvasElement, oCanvas: HTMLCanvasElement, fps: number) {
+        this.bgCanvas = bgCanvas;
+        this.bgCanvas.width = 1920;
+        this.bgCanvas.height = 1080;
+        this.bgCtx = bgCanvas.getContext('2d');
+
+        this.oCanvas = oCanvas;
+        this.oCanvas.width = 1920;
+        this.oCanvas.height = 1080;
+        this.oCtx = oCanvas.getContext('2d');
+
         this.fps = fps;
         this.objects = new Array();
     }
@@ -51,21 +59,21 @@ class Game {
     }
 
     refresh() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.oCtx.clearRect(0, 0, this.oCanvas.width, this.oCanvas.height);
         this.drawMapObjects();
     }
 
     drawMapObjects() {
         for (var o in this.objects) {
-            this.objects[o].draw(this.ctx);
+            this.objects[o].draw(this.oCtx);
         }
     }
 
     addMapObject(obj: IMapObject) {
         obj.currAnim = 2;
         obj.currStep = 1;
-        obj.x = 0;
-        obj.y = 0;
+        obj.x = 600;
+        obj.y = 600;
         this.objects.push(obj);
     }
 }
@@ -76,20 +84,20 @@ function canGame() {
 
 $(function () {
     if (canGame()) {
-        var canvas = <HTMLCanvasElement>$('canvas')[0],
-            game = new Game(canvas, 60),
+        var bgCanvas = <HTMLCanvasElement>$('canvas#bg')[0],
+            oCanvas = <HTMLCanvasElement>$('canvas#objects')[0],
+            game = new Game(bgCanvas, oCanvas, 60),
             world = new World(1000, 1000, 100, 50, 5),
-            sprite = new Sprite('/img/char.png'),
+            sprite = new Sprite('/img/char.png', world),
             controls = new Controls(game.fps);
 
         world.build();
-        world.render(canvas);
+        world.render(bgCanvas);
 
         game.userControlled = sprite;
         game.addMapObject(sprite);
 
         game.onGameReady(function () {
-            return false;
             game.start();
             controls.start(sprite);
         });

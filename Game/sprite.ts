@@ -1,5 +1,6 @@
 ﻿class Sprite implements IMapObject {
     set: Array<Array<HTMLImageElement>>;
+    world: World;
     x: number;
     y: number;
     height: number;
@@ -10,8 +11,10 @@
     stepDir: number;
     currStep: number;
 
-    constructor(charPath: string) {
+    constructor(charPath: string, world: World) {
         var sprite = this;
+
+        sprite.world = world;
 
         sprite.height = 96;
         sprite.width = 72;
@@ -60,6 +63,12 @@
     }
 
     move(x: number, y: number, strength: number) {
+        var nextX = this.x + (x * strength * 2),
+            nextY = this.y + (y * strength * 2),
+            nextBlock = this.world.getBlock(nextX, nextY);
+
+        if (nextBlock.type === TerrainType.ocean || nextBlock.type === TerrainType.mountain) return; 
+
         if (this.stepCounter >= 40) this.stepDir = -strength;
         else if (this.stepCounter <= 0) this.stepDir = strength;
 
@@ -67,8 +76,8 @@
 
         this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
         this.currStep = this.stepCounter < 10 ? 0 : this.stepCounter > 30 ? 2 : 1;
-        this.x += (x * strength * 2);
-        this.y += (y * strength * 2);
+        this.x = nextX;
+        this.y = nextY;
     }
 
     draw(ctx: CanvasRenderingContext2D) {

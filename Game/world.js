@@ -8,9 +8,10 @@ var TerrainType;
     TerrainType[TerrainType["mountain"] = 5] = "mountain";
 })(TerrainType || (TerrainType = {}));
 var World = (function () {
-    function World(x, y, tileSize, gradientSize) {
+    function World(x, y, sectionSize, tileSize, gradientSize) {
         this.numX = x;
         this.numY = y;
+        this.sectionSize = sectionSize;
         this.tileSize = tileSize;
         this.gradientSize = gradientSize;
         // init grid
@@ -137,6 +138,8 @@ var World = (function () {
             prevPush = push;
         }
     };
+    World.prototype.loadSection = function (x, y) {
+    };
     World.prototype.render = function (canvas) {
         var ctx = canvas.getContext("2d"), view = {
             startY: 0,
@@ -157,6 +160,9 @@ var World = (function () {
         ctx.fillStyle = block.bg;
         // Draw a square using the fillRect() method and fill it with the colour specified by the fillStyle attribute
         ctx.fillRect(block.x * this.tileSize, block.y * this.tileSize, this.tileSize, this.tileSize);
+    };
+    World.prototype.getBlock = function (x, y) {
+        return this.grid[y / this.tileSize][x / this.tileSize];
     };
     World.prototype.setNearbyPointers = function (block) {
         block.above = block.y > 0 ? this.grid[block.y - 1][block.x] : null;
