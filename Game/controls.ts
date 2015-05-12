@@ -1,8 +1,14 @@
 ﻿class Controls {
     fps: number;
+    x: number;
+    y: number;
+    strength: number;
 
     constructor(fps: number) {
         this.fps = fps;
+        this.x = 0;
+        this.y = 0;
+        this.strength = 0;
     }
 
     report(sprite: Sprite) {
@@ -45,11 +51,14 @@
             //angle += ((quadrant - 1) * 90);
             //console.log("angle: " + angle);
 
-            sprite.move(x, y, strength);
+            this.x = x;
+            this.y = y;
+            this.strength = strength;
+            //sprite.move(x, y, strength);
         }
     }
 
-    start(sprite: Sprite) {
+    start() {
         var obj = this,
             hasGP = false,
             repGP;
@@ -57,8 +66,8 @@
         $(window).on("gamepadconnected", function () {
             console.log("connection event");
             repGP = window.setInterval(function () {
-                obj.report.call(obj, sprite);
-            }, 1000 / obj.fps);
+                obj.report.call(obj);
+            }, 1000 / this.fps);
         });
 
         $(window).on("gamepaddisconnected", function () {

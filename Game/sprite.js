@@ -1,7 +1,6 @@
 var Sprite = (function () {
-    function Sprite(charPath, world) {
+    function Sprite(charPath) {
         var sprite = this;
-        sprite.world = world;
         sprite.height = 96;
         sprite.width = 72;
         sprite.set = null;
@@ -35,34 +34,34 @@ var Sprite = (function () {
         };
         charset.src = filename;
     };
-    Sprite.prototype.move = function (x, y, strength) {
-        var nextX = Math.round(this.x + (x * strength * 2)), nextY = Math.round(this.y + (y * strength * 2)), nextBlock = this.world.getBlock(nextX, nextY);
+    Sprite.prototype.move = function (x, y, strength, world) {
+        var nextX = Math.round(this.x + (x * strength * 2)), nextY = Math.round(this.y + (y * strength * 2)), nextBlock = world.getBlock(nextX, nextY);
         // logging
         var info2 = document.getElementById('tile');
         info2.innerHTML = nextBlock.type.toString();
-        if (nextBlock.type === TerrainType.ocean || nextBlock.type === TerrainType.mountain)
-            return;
-        if (this.stepCounter >= 40)
-            this.stepDir = -strength;
-        else if (this.stepCounter <= 0)
-            this.stepDir = strength;
-        this.stepCounter += this.stepDir;
-        this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
-        this.currStep = this.stepCounter < 10 ? 0 : this.stepCounter > 30 ? 2 : 1;
-        this.x = nextX;
-        this.y = nextY;
+        if (nextBlock.type === 0 /* ocean */ || nextBlock.type === 5 /* mountain */) {
+            this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
+        }
+        else {
+            if (this.stepCounter >= 40)
+                this.stepDir = -strength;
+            else if (this.stepCounter <= 0)
+                this.stepDir = strength;
+            this.stepCounter += this.stepDir;
+            this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
+            this.currStep = this.stepCounter < 10 ? 0 : this.stepCounter > 30 ? 2 : 1;
+            this.x = nextX;
+            this.y = nextY;
+        }
         // logging
         var info = document.getElementById('pos');
         info.innerHTML = "";
         info.innerHTML += 'x: ' + this.x + '<br />';
         info.innerHTML += 'y: ' + this.y;
     };
-    Sprite.prototype.draw = function (ctx) {
-        var centeredX = (this.world.game.resX / 2) + (this.width / 2), centeredY = (this.world.game.resY / 2);
+    Sprite.prototype.draw = function (ctx, view) {
+        var offsetX = this.x - (this.width / 2.2), offsetY = this.y - (.9 * this.height), centeredX = offsetX - view.startX, centeredY = offsetY - view.startY;
         ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height, centeredX, centeredY, this.width, this.height);
-        ctx.fillRect(centeredY, centeredY, 4, 4);
-        //ctx.fillRect(this.x - (this.world.game.resX / 2), this.y - (this.world.game.resY / 2), 1, 200);
-        //ctx.fillRect(this.x - (this.world.game.resX / 2), this.y - (this.world.game.resY / 2), 200, 1);
     };
     return Sprite;
 })();

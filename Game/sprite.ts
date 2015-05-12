@@ -1,6 +1,5 @@
 ﻿class Sprite implements IMapObject {
     set: Array<Array<HTMLImageElement>>;
-    world: World;
     x: number;
     y: number;
     height: number;
@@ -11,10 +10,8 @@
     stepDir: number;
     currStep: number;
 
-    constructor(charPath: string, world: World) {
+    constructor(charPath: string) {
         var sprite = this;
-
-        sprite.world = world;
 
         sprite.height = 96;
         sprite.width = 72;
@@ -62,26 +59,29 @@
         charset.src = filename;
     }
 
-    move(x: number, y: number, strength: number) {
+    move(x: number, y: number, strength: number, world: World) {
         var nextX = Math.round(this.x + (x * strength * 2)),
             nextY = Math.round(this.y + (y * strength * 2)),
-            nextBlock = this.world.getBlock(nextX, nextY);
+            nextBlock = world.getBlock(nextX, nextY);
 
         // logging
         var info2 = document.getElementById('tile');
         info2.innerHTML = nextBlock.type.toString();
 
-        if (nextBlock.type === TerrainType.ocean || nextBlock.type === TerrainType.mountain) return; 
+        if (nextBlock.type === TerrainType.ocean || nextBlock.type === TerrainType.mountain) {
+            this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
+        }
+        else {
+            if (this.stepCounter >= 40) this.stepDir = -strength;
+            else if (this.stepCounter <= 0) this.stepDir = strength;
 
-        if (this.stepCounter >= 40) this.stepDir = -strength;
-        else if (this.stepCounter <= 0) this.stepDir = strength;
+            this.stepCounter += this.stepDir;
 
-        this.stepCounter += this.stepDir;
-
-        this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
-        this.currStep = this.stepCounter < 10 ? 0 : this.stepCounter > 30 ? 2 : 1;
-        this.x = nextX;
-        this.y = nextY;
+            this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
+            this.currStep = this.stepCounter < 10 ? 0 : this.stepCounter > 30 ? 2 : 1;
+            this.x = nextX;
+            this.y = nextY;
+        }
 
         // logging
         var info = document.getElementById('pos');
@@ -90,13 +90,12 @@
         info.innerHTML += 'y: ' + this.y;
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
-        var centeredX = (this.world.game.resX / 2) + (this.width / 2),
-            centeredY = (this.world.game.resY / 2);
+    draw(ctx: CanvasRenderingContext2D, view: ViewPort) {
+        var offsetX = this.x - (this.width / 2.2),
+            offsetY = this.y - (.9 * this.height),
+            centeredX = offsetX - view.startX,
+            centeredY = offsetY - view.startY;
 
         ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height, centeredX, centeredY, this.width, this.height);
-        ctx.fillRect(centeredY, centeredY, 4, 4);
-        //ctx.fillRect(this.x - (this.world.game.resX / 2), this.y - (this.world.game.resY / 2), 1, 200);
-        //ctx.fillRect(this.x - (this.world.game.resX / 2), this.y - (this.world.game.resY / 2), 200, 1);
     }
 }
