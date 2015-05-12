@@ -36,7 +36,10 @@ var Sprite = (function () {
         charset.src = filename;
     };
     Sprite.prototype.move = function (x, y, strength) {
-        var nextX = this.x + (x * strength * 2), nextY = this.y + (y * strength * 2), nextBlock = this.world.getBlock(nextX, nextY);
+        var nextX = Math.round(this.x + (x * strength * 2)), nextY = Math.round(this.y + (y * strength * 2)), nextBlock = this.world.getBlock(nextX, nextY);
+        // logging
+        var info2 = document.getElementById('tile');
+        info2.innerHTML = nextBlock.type.toString();
         if (nextBlock.type === TerrainType.ocean || nextBlock.type === TerrainType.mountain)
             return;
         if (this.stepCounter >= 40)
@@ -48,9 +51,18 @@ var Sprite = (function () {
         this.currStep = this.stepCounter < 10 ? 0 : this.stepCounter > 30 ? 2 : 1;
         this.x = nextX;
         this.y = nextY;
+        // logging
+        var info = document.getElementById('pos');
+        info.innerHTML = "";
+        info.innerHTML += 'x: ' + this.x + '<br />';
+        info.innerHTML += 'y: ' + this.y;
     };
     Sprite.prototype.draw = function (ctx) {
-        ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height, this.x, this.y, this.width, this.height);
+        var centeredX = (this.world.game.resX / 2) + (this.width / 2), centeredY = (this.world.game.resY / 2);
+        ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height, centeredX, centeredY, this.width, this.height);
+        ctx.fillRect(centeredY, centeredY, 4, 4);
+        //ctx.fillRect(this.x - (this.world.game.resX / 2), this.y - (this.world.game.resY / 2), 1, 200);
+        //ctx.fillRect(this.x - (this.world.game.resX / 2), this.y - (this.world.game.resY / 2), 200, 1);
     };
     return Sprite;
 })();

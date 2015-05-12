@@ -25,24 +25,31 @@ enum TerrainType {
 }
 
 class World {
+    game: Game;
     grid: Array<Array<Block>>;
-    cached: Array<Section>;
-    sectionSize: number;
+    cached: HTMLCanvasElement;
     numX: number;
     numY: number;
     tileSize: number;
     gradientSize: number;
     terrainType: TerrainType;
+    view;
 
-    constructor(x, y, sectionSize, tileSize, gradientSize) {
+    constructor(game: Game, x, y, tileSize, gradientSize) {
+        this.game = game;
         this.numX = x;
         this.numY = y;
-        this.sectionSize = sectionSize;
         this.tileSize = tileSize;
         this.gradientSize = gradientSize;
 
         // init grid
-        this.initGrid()
+        this.cached = document.createElement('canvas');
+        this.cached.width = x * tileSize;
+        this.cached.height = y * tileSize;
+
+        this.initGrid();
+        this.build();
+        this.render();
     }
 
     initGrid() {
@@ -101,10 +108,10 @@ class World {
     }
 
     createMountain() {
-        var startX = Math.round((this.numX / 2) - this.gradientSize - (Math.random() * 10)),
-            endX = Math.round((this.numX / 2) + this.gradientSize + (Math.random() * 10)),
-            startY = Math.round((this.numY / 2) - this.gradientSize - (Math.random() * 10)),
-            endY = Math.round((this.numY / 2) + this.gradientSize + (Math.random() * 10));
+        var startX = Math.round((this.numX / 2) - this.gradientSize),
+            endX = Math.round((this.numX / 2) + this.gradientSize),
+            startY = Math.round((this.numY / 2) - this.gradientSize),
+            endY = Math.round((this.numY / 2) + this.gradientSize);
 
         for (var y = startY; y < endY; y++) {
             for (var x = startX; x < endX; x++) {
@@ -203,25 +210,26 @@ class World {
         }
     }
 
-    loadSection(x, y) {
+    renderView() {
+        var ctx = this.game.canvas.getContext("2d");
+
+        var info = document.getElementById('view');
+        info.innerHTML = "";
+        info.innerHTML += 'startX: ' + this.view.startX + '<br />';
+        info.innerHTML += 'endX: ' + this.view.endX + '<br />';
+        info.innerHTML += 'startY: ' + this.view.startY + '<br />';
+        info.innerHTML += 'endY: ' + this.view.endY;
+
+        ctx.drawImage(this.cached, this.view.startX, this.view.startY, this.game.resX, this.game.resY, 0, 0, this.game.resX, this.game.resY);
     }
 
-    render(canvas: HTMLCanvasElement) {
-        var ctx = canvas.getContext("2d"),
-            view = {
-                startY: 0,
-                startX: 0,
-                endY: 1000,
-                endX: 1000
-            };
+    render() {
+        var ctx = this.cached.getContext("2d");
 
-        // cache nearby sections
-
-        // render blocks for viewport
-        for (var y = view.startY; y < view.endY; y++) {
+        for (var y = 0; y < this.numY; y++) {
             var row = this.grid[y];
 
-            for (var x = view.startX; x < view.endX; x++) {
+            for (var x = 0; x < this.numX; x++) {
                 var block = row[x];
                 this.renderBlock(block, ctx);
             }
@@ -236,8 +244,45 @@ class World {
         ctx.fillRect(block.x * this.tileSize, block.y * this.tileSize, this.tileSize, this.tileSize);       
     }
 
+    moveViewCenter(userSprite: Sprite) {
+        var newStartX = userSprite.x - (this.game.resX / 2),
+            newEndX = newStartX + this.game.resX,
+            newStartY = userSprite.y - (this.game.resY / 2),
+            newEndY = newStartY + this.game.resY;
+
+        //if (newStartX <= 0) {
+        //    newStartX = 0;
+        //    newEndX = this.game.resX;
+        //    center = false;
+        //}
+        //else if (newEndX >= this.numX * this.tileSize) {
+        //    newStartX = (this.numX * this.tileSize) - this.game.resX;
+        //    newEndX = this.numX * this.tileSize;
+        //    center = false;
+        //}
+        //else if (newStartY <= 0) {
+        //    newStartY = 0;
+        //    newEndY = this.game.resY;
+        //    center = false;
+        //}
+        //else if (newEndY >= this.numY * this.tileSize) {
+        //    newStartY = (this.numY * this.tileSize) - this.game.resY;
+        //    newEndY = this.numY * this.tileSize;
+        //    center = false;
+        //}
+
+        this.view = {
+            startX: newStartX,
+            endX: newEndX,
+            startY: newStartY,
+            endY: newEndY
+        };
+
+        this.renderView();
+    }
+
     getBlock(x: number, y: number) {
-        return this.grid[y / this.tileSize][x / this.tileSize];
+        return this.grid[Math.round(y / this.tileSize)][Math.round(x / this.tileSize)];
     }
 
     setNearbyPointers(block) {
