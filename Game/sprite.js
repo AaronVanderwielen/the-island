@@ -40,7 +40,7 @@ var Sprite = (function () {
         var info2 = document.getElementById('tile');
         info2.innerHTML = nextBlock.type.toString();
         if (strength > 0) {
-            if (nextBlock.type === TerrainType.ocean || nextBlock.type === TerrainType.mountain) {
+            if (false) {
                 this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
             }
             else {
@@ -52,11 +52,8 @@ var Sprite = (function () {
                 this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
                 this.currStep = this.stepCounter < 10 ? 0 : this.stepCounter > 30 ? 2 : 1;
                 if (this.stepCounter === 40 || this.stepCounter === 0) {
-                    if (strength == 1) {
-                        sound.startNote(40, .2, .8, 'sawtooth');
-                    }
-                    else {
-                        sound.startNote(40, .2, 1, 'sawtooth');
+                    if (strength == 2) {
+                        sound.startNote(50, .1, .4, 'triangle');
                     }
                 }
                 this.x = nextX;

@@ -6,6 +6,7 @@ var TerrainType;
     TerrainType[TerrainType["dirt"] = 3] = "dirt";
     TerrainType[TerrainType["rock"] = 4] = "rock";
     TerrainType[TerrainType["mountain"] = 5] = "mountain";
+    TerrainType[TerrainType["lava"] = 6] = "lava";
 })(TerrainType || (TerrainType = {}));
 var World = (function () {
     function World(x, y, tileSize, gradientSize) {
@@ -47,11 +48,12 @@ var World = (function () {
         this.createOcean();
         this.createBeach();
         this.createMountain();
-        for (var y = this.gradientSize * 3; y < this.numY - (this.gradientSize * 3); y++) {
-            for (var x = this.gradientSize * 3; x < this.numX - (this.gradientSize * 3); x++) {
-                this.setTerrainType(this.grid[y][x]);
-            }
-        }
+        this.fill(this.gradientSize * 4, this.numX - (this.gradientSize * 4), this.gradientSize * 4, this.numY - (this.gradientSize * 4), 3 /* dirt */, false);
+        //for (var y = this.gradientSize * 3; y < this.numY - (this.gradientSize * 3); y++) {
+        //    for (var x = this.gradientSize * 3; x < this.numX - (this.gradientSize * 3); x++) {
+        //        this.setTerrainType(this.grid[y][x]);
+        //    }
+        //}
     };
     World.prototype.createOcean = function () {
         this.layerEmptyTop(0, this.numX, 0, 0 /* ocean */, 1 /* beach */, true);
@@ -66,11 +68,54 @@ var World = (function () {
         this.layerEmptyLeft(this.gradientSize * 2, this.gradientSize * 2, this.numY - (this.gradientSize * 2) + 1, 1 /* beach */, 3 /* dirt */, true);
     };
     World.prototype.createMountain = function () {
-        var startX = Math.round((this.numX / 2) - this.gradientSize), endX = Math.round((this.numX / 2) + this.gradientSize), startY = Math.round((this.numY / 2) - this.gradientSize), endY = Math.round((this.numY / 2) + this.gradientSize);
-        for (var y = startY; y < endY; y++) {
-            for (var x = startX; x < endX; x++) {
-                this.setType(this.grid[y][x], 5 /* mountain */);
+        this.randShape(Math.round(this.numX / 2), Math.round(this.numY / 2), Math.round(this.gradientSize / 3), 1, 6 /* lava */);
+        this.randShape(Math.round(this.numX / 2), Math.round(this.numY / 2), this.gradientSize * 2, 1, 5 /* mountain */);
+        //// lava
+        //var lStartX = Math.round((this.numX / 2) - (this.gradientSize / 2)),
+        //    lEndX = Math.round((this.numX / 2) + (this.gradientSize / 2)),
+        //    lStartY = Math.round((this.numY / 2) - (this.gradientSize / 2)),
+        //    lEndY = Math.round((this.numY / 2) + (this.gradientSize / 2));
+        //this.layerEmptyBelow(lStartX, lEndX, lStartY, TerrainType.mountain, TerrainType.rock, false);
+        //this.layerEmptyLeft(lStartX, lStartY, lEndY, TerrainType.mountain, TerrainType.rock, false);
+        //this.layerEmptyTop(lStartX, lEndX, lEndY, TerrainType.mountain, TerrainType.rock, false);
+        //this.layerEmptyRight(lStartX, lStartY, lEndY, TerrainType.mountain, TerrainType.rock, false);
+        //// mountain
+        //var mStartX = Math.round((this.numX / 2) - this.gradientSize),
+        //    mEndX = Math.round((this.numX / 2) + this.gradientSize),
+        //    mStartY = Math.round((this.numY / 2) - this.gradientSize),
+        //    mEndY = Math.round((this.numY / 2) + this.gradientSize);
+        //this.layerEmptyBelow(mStartX, mEndX, mStartY, TerrainType.mountain, TerrainType.rock, false);
+        //this.layerEmptyLeft(mStartX, mStartY, mEndY, TerrainType.mountain, TerrainType.rock, false);
+        //this.layerEmptyTop(mStartX, mEndX, mEndY, TerrainType.mountain, TerrainType.rock, false);
+        //this.layerEmptyRight(mStartX, mStartY, mEndY, TerrainType.mountain, TerrainType.rock, false);
+        //// rocky surrounding
+        //var rStartX = mStartX - Math.round(this.gradientSize * Math.random()),
+        //    rEndX = mEndX + Math.round(this.gradientSize * Math.random()),
+        //    rStartY = mStartY - Math.round(this.gradientSize * Math.random()),
+        //    rEndY = mEndY + Math.round(this.gradientSize * Math.random());
+        //this.layerEmptyBelow(rStartX, rEndX, rStartY, TerrainType.rock, TerrainType.dirt, false);
+        //this.layerEmptyLeft(rStartX, rStartY, rEndY, TerrainType.rock, TerrainType.dirt, false);
+        //this.layerEmptyTop(rStartX, rEndX, rEndY, TerrainType.rock, TerrainType.dirt, false);
+        //this.layerEmptyRight(rStartX, rStartY, rEndY, TerrainType.rock, TerrainType.dirt, false);
+    };
+    World.prototype.randShape = function (cx, cy, d, smooth, type, overwrite) {
+        var startX = Math.round(cx - d - (d * Math.random())), endX = Math.round(cx + d + (d * Math.random())), startY = cy - d, endY = cy + d, prevPushA = 0, prevPushB = 0;
+        for (var x = startX; x <= endX; x++) {
+            var xFactor = d - Math.abs(cx - x), pushA = Math.round(d * Math.random()) + (xFactor > d / 2 ? d / 2 : xFactor), evenedA = pushA, pushB = Math.round(d * Math.random()) + (xFactor > d / 2 ? d / 2 : xFactor), evenedB = pushB;
+            for (var s = 0; s < smooth; s++) {
+                evenedA = Math.round((evenedA + prevPushA) / 2);
+                evenedB = Math.round((evenedB + prevPushB) / 2);
             }
+            for (var y = startY; y <= endY; y++) {
+                if (overwrite || !this.typeIsSet(this.grid[y][x])) {
+                    // if y is center or y is higher but greater than even or y is lower but less than even, make type
+                    if ((y == cy && (evenedA > 0 || evenedB > 0)) || (y < cy && y >= cy - evenedA) || (y > cy && y <= cy + evenedB)) {
+                        this.setType(this.grid[y][x], type);
+                    }
+                }
+            }
+            prevPushA = evenedA;
+            prevPushB = evenedB;
         }
     };
     World.prototype.layerEmptyTop = function (startX, endX, startY, type, fillType, overwrite) {
@@ -168,6 +213,15 @@ var World = (function () {
         block.left = block.x > 0 ? this.grid[block.y][block.x - 1] : null;
         block.right = block.x < this.numX - 2 ? this.grid[block.y][block.x + 1] : null;
     };
+    World.prototype.fill = function (startX, endX, startY, endY, fillType, overwrite) {
+        for (var y = startY; y < endY; y++) {
+            for (var x = startX; x < endX; x++) {
+                if (overwrite || !this.typeIsSet(this.grid[y][x])) {
+                    this.setType(this.grid[y][x], fillType);
+                }
+            }
+        }
+    };
     World.prototype.setTerrainType = function (block) {
         if (block.type !== undefined && block.type !== null) {
             return;
@@ -223,6 +277,10 @@ var World = (function () {
         }
         else if (type == 5 /* mountain */) {
             block.bg = "#444";
+            block.type = 5 /* mountain */;
+        }
+        else if (type == 6 /* lava */) {
+            block.bg = "#600";
             block.type = 5 /* mountain */;
         }
     };

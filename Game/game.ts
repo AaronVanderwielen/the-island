@@ -77,15 +77,23 @@ class Game {
 
     start() {
         var obj = this;
+
+        window.setInterval(function () {
+            obj.stateUpdate()
+        }, 5);
+
         window.setInterval(function () {
             obj.refresh();
         }, 1000 / obj.fps);
     }
 
+    stateUpdate() {
+        this.moveUserControlled();
+    }
+
     refresh() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.moveViewCenter(this.userControlled);
-        this.moveUserControlled();
         this.drawMapObjects();
     }
 

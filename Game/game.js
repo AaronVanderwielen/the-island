@@ -37,13 +37,18 @@ var Game = (function () {
     Game.prototype.start = function () {
         var obj = this;
         window.setInterval(function () {
+            obj.stateUpdate();
+        }, 5);
+        window.setInterval(function () {
             obj.refresh();
         }, 1000 / obj.fps);
+    };
+    Game.prototype.stateUpdate = function () {
+        this.moveUserControlled();
     };
     Game.prototype.refresh = function () {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.moveViewCenter(this.userControlled);
-        this.moveUserControlled();
         this.drawMapObjects();
     };
     Game.prototype.moveUserControlled = function () {
