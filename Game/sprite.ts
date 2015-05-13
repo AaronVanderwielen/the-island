@@ -59,7 +59,7 @@
         charset.src = filename;
     }
 
-    move(x: number, y: number, strength: number, world: World) {
+    move(x: number, y: number, strength: number, world: World, sound: Sound) {
         var nextX = Math.round(this.x + (x * strength * 2)),
             nextY = Math.round(this.y + (y * strength * 2)),
             nextBlock = world.getBlock(nextX, nextY);
@@ -68,19 +68,31 @@
         var info2 = document.getElementById('tile');
         info2.innerHTML = nextBlock.type.toString();
 
-        if (nextBlock.type === TerrainType.ocean || nextBlock.type === TerrainType.mountain) {
-            this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
-        }
-        else {
-            if (this.stepCounter >= 40) this.stepDir = -strength;
-            else if (this.stepCounter <= 0) this.stepDir = strength;
+        if (strength > 0) {
+            if (nextBlock.type === TerrainType.ocean || nextBlock.type === TerrainType.mountain) {
+                this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
+            }
+            else {
+                if (this.stepCounter >= 40) this.stepDir = -strength;
+                else if (this.stepCounter <= 0) this.stepDir = strength;
 
-            this.stepCounter += this.stepDir;
+                this.stepCounter += this.stepDir;
 
-            this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
-            this.currStep = this.stepCounter < 10 ? 0 : this.stepCounter > 30 ? 2 : 1;
-            this.x = nextX;
-            this.y = nextY;
+                this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
+                this.currStep = this.stepCounter < 10 ? 0 : this.stepCounter > 30 ? 2 : 1;
+
+                if (this.stepCounter === 40 || this.stepCounter === 0) {
+                    if (strength == 1) {
+                        sound.startNote(40, .2, .8, 'sawtooth');
+                    }
+                    else {
+                        sound.startNote(40, .2, 1, 'sawtooth');
+                    }
+                }
+
+                this.x = nextX;
+                this.y = nextY;
+            }
         }
 
         // logging

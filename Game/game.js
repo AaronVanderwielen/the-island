@@ -30,7 +30,7 @@ var Game = (function () {
             }
             if (ready) {
                 window.clearInterval(i);
-                callback();
+                callback.call(game);
             }
         }, 100);
     };
@@ -47,7 +47,7 @@ var Game = (function () {
         this.drawMapObjects();
     };
     Game.prototype.moveUserControlled = function () {
-        this.userControlled.move(this.userControls.x, this.userControls.y, this.userControls.strength, this.world);
+        this.userControlled.move(this.userControls.x, this.userControls.y, this.userControls.strength, this.world, this.sound);
     };
     Game.prototype.drawMapObjects = function () {
         for (var o in this.objects) {
@@ -73,26 +73,6 @@ var Game = (function () {
     };
     Game.prototype.moveViewCenter = function (userSprite) {
         var newStartX = userSprite.x - (this.resX / 2), newEndX = newStartX + this.resX, newStartY = userSprite.y - (this.resY / 2), newEndY = newStartY + this.resY;
-        //if (newStartX <= 0) {
-        //    newStartX = 0;
-        //    newEndX = this.game.resX;
-        //    center = false;
-        //}
-        //else if (newEndX >= this.numX * this.tileSize) {
-        //    newStartX = (this.numX * this.tileSize) - this.game.resX;
-        //    newEndX = this.numX * this.tileSize;
-        //    center = false;
-        //}
-        //else if (newStartY <= 0) {
-        //    newStartY = 0;
-        //    newEndY = this.game.resY;
-        //    center = false;
-        //}
-        //else if (newEndY >= this.numY * this.tileSize) {
-        //    newStartY = (this.numY * this.tileSize) - this.game.resY;
-        //    newEndY = this.numY * this.tileSize;
-        //    center = false;
-        //}
         this.view = {
             startX: newStartX,
             endX: newEndX,
