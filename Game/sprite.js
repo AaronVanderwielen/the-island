@@ -62,6 +62,7 @@ var Sprite = (function () {
     Sprite.prototype.draw = function (ctx, view) {
         var offsetX = this.x - (this.width / 2.2), offsetY = this.y - (.9 * this.height), centeredX = offsetX - view.startX, centeredY = offsetY - view.startY;
         ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height, centeredX, centeredY, this.width, this.height);
+        //ctx.fillRect(this.x - view.startX, this.y - view.startY, 4, 4);
     };
     return Sprite;
 })();

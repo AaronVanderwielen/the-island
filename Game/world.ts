@@ -25,7 +25,6 @@ enum TerrainType {
 }
 
 class World {
-    game: Game;
     grid: Array<Array<Block>>;
     cached: HTMLCanvasElement;
     numX: number;
@@ -34,8 +33,7 @@ class World {
     gradientSize: number;
     terrainType: TerrainType;
 
-    constructor(game: Game, x, y, tileSize, gradientSize) {
-        this.game = game;
+    constructor(x, y, tileSize, gradientSize) {
         this.numX = x;
         this.numY = y;
         this.tileSize = tileSize;

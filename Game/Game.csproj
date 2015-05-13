@@ -30,6 +30,7 @@
     <TypeScriptCompile Include="game.ts" />
     <TypeScriptCompile Include="controls.ts" />
     <TypeScriptCompile Include="jquery.d.ts" />
+    <TypeScriptCompile Include="sound.ts" />
     <TypeScriptCompile Include="sprite.ts" />
     <TypeScriptCompile Include="world.ts" />
   </ItemGroup>

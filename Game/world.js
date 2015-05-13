@@ -8,8 +8,7 @@ var TerrainType;
     TerrainType[TerrainType["mountain"] = 5] = "mountain";
 })(TerrainType || (TerrainType = {}));
 var World = (function () {
-    function World(game, x, y, tileSize, gradientSize) {
-        this.game = game;
+    function World(x, y, tileSize, gradientSize) {
         this.numX = x;
         this.numY = y;
         this.tileSize = tileSize;

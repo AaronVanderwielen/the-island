@@ -25,10 +25,10 @@
                 y = gp.axes[1],
                 c = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)),
                 strength = c < .2 ? 0 : (c < .8 ? 1 : 2);
-                //quadrant,
-                //o,
-                //angle,
-                //degrees;
+            //quadrant,
+            //o,
+            //angle,
+            //degrees;
 
             //if (x >= 0 && y >= 0) {
             //    quadrant = 1;
@@ -55,6 +55,9 @@
             this.y = y;
             this.strength = strength;
             //sprite.move(x, y, strength);
+        }
+        else {
+            this.strength = 0;
         }
     }
 

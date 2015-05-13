@@ -9,6 +9,17 @@ var Game = (function () {
         this.fps = fps;
         this.objects = new Array();
     }
+    Game.prototype.init = function () {
+        this.world = new World(100, 100, 100, 5);
+        this.sound = new Sound();
+        this.userControls = new Controls(this.fps);
+        this.userControlled = new Sprite('/img/char.png');
+        this.addMapObject(this.userControlled);
+        this.onGameReady(function () {
+            this.userControls.start();
+            this.start();
+        });
+    };
     Game.prototype.onGameReady = function (callback) {
         var game = this, i;
         i = window.setInterval(function () {
@@ -92,20 +103,10 @@ var Game = (function () {
     };
     return Game;
 })();
-function canGame() {
-    return "getGamepads" in navigator;
-}
 $(function () {
-    if (canGame()) {
+    if ("getGamepads" in navigator) {
         var canvas = $('canvas')[0], game = new Game(canvas, 1280, 800, 60);
-        game.world = new World(game, 100, 100, 100, 5);
-        game.userControls = new Controls(game.fps);
-        game.userControlled = new Sprite('/img/char.png');
-        game.addMapObject(game.userControlled);
-        game.onGameReady(function () {
-            game.userControls.start();
-            game.start();
-        });
+        game.init();
     }
 });
 //# sourceMappingURL=game.js.map

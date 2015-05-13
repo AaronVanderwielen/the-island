@@ -7,6 +7,7 @@
     currAnim: number;
     currStep: number;
     draw(ctx: CanvasRenderingContext2D, view: ViewPort);
+    // Sound for each mapobject?
 }
 
 interface ViewPort {
@@ -18,8 +19,12 @@ interface ViewPort {
 
 class Game {
     world: World;
+    sound: Sound;
     userControls: Controls;
     userControlled: Sprite;
+    audioContext;
+    currentOsc;
+    currentGain;
     view: ViewPort;
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
@@ -41,6 +46,19 @@ class Game {
         this.objects = new Array();
     }
 
+    init() {
+        this.world = new World(100, 100, 100, 5);
+        this.sound = new Sound();
+        this.userControls = new Controls(this.fps);
+        this.userControlled = new Sprite('/img/char.png');
+        this.addMapObject(this.userControlled);
+
+        this.onGameReady(function () {
+            this.userControls.start();
+            this.start();
+        });
+    }
+
     onGameReady(callback: Function) {
         var game = this,
             i;
@@ -59,7 +77,6 @@ class Game {
 
     start() {
         var obj = this;
-
         window.setInterval(function () {
             obj.refresh();
         }, 1000 / obj.fps);
@@ -141,23 +158,11 @@ class Game {
     }
 }
 
-function canGame() {
-    return "getGamepads" in navigator;
-}
-
 $(function () {
-    if (canGame()) {
+    if ("getGamepads" in navigator) {
         var canvas = <HTMLCanvasElement>$('canvas')[0],
             game = new Game(canvas, 1280, 800, 60);
 
-        game.world = new World(game, 100, 100, 100, 5); 
-        game.userControls = new Controls(game.fps)
-        game.userControlled = new Sprite('/img/char.png');
-        game.addMapObject(game.userControlled);
-
-        game.onGameReady(function () {
-            game.userControls.start();
-            game.start();
-        });
+        game.init();
     }
 });

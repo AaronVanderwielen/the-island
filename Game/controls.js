@@ -41,6 +41,9 @@ var Controls = (function () {
             this.y = y;
             this.strength = strength;
         }
+        else {
+            this.strength = 0;
+        }
     };
     Controls.prototype.start = function () {
         var obj = this, hasGP = false, repGP;
