@@ -80,7 +80,7 @@ class Game {
 
         window.setInterval(function () {
             obj.stateUpdate()
-        }, 5);
+        }, 15);
 
         window.setInterval(function () {
             obj.refresh();

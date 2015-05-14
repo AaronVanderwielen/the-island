@@ -38,7 +38,7 @@ var Game = (function () {
         var obj = this;
         window.setInterval(function () {
             obj.stateUpdate();
-        }, 5);
+        }, 15);
         window.setInterval(function () {
             obj.refresh();
         }, 1000 / obj.fps);
