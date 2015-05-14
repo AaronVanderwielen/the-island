@@ -40,7 +40,7 @@ var Sprite = (function () {
         var info2 = document.getElementById('tile');
         info2.innerHTML = nextBlock.type.toString();
         if (strength > 0) {
-            if (false) {
+            if (nextBlock.type === 0 /* ocean */ || nextBlock.type === 5 /* mountain */) {
                 this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
             }
             else {

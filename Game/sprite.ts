@@ -69,7 +69,7 @@
         info2.innerHTML = nextBlock.type.toString();
 
         if (strength > 0) {
-            if (false) {//nextBlock.type === TerrainType.ocean || nextBlock.type === TerrainType.mountain) {
+            if (nextBlock.type === TerrainType.ocean || nextBlock.type === TerrainType.mountain) {
                 this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
             }
             else {
