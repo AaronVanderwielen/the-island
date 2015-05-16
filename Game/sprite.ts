@@ -10,7 +10,7 @@
     stepDir: number;
     currStep: number;
 
-    constructor(charPath: string) {
+    constructor(asset: Asset) {
         var sprite = this;
 
         sprite.height = 96;
@@ -20,12 +20,12 @@
         sprite.stepCounter = 0;
         sprite.stepDir = 1;
 
-        sprite.importSet(charPath, function (set) {
+        sprite.importSet(asset.value, function (set) {
             sprite.set = set;
         });
     }
 
-    importSet(filename: string, callback: Function) {
+    importSet(charset: HTMLImageElement, callback: Function) {
         var charsetData = [
             [null, null, null], // up
             [null, null, null], // right
@@ -33,30 +33,24 @@
             [null, null, null]  // left
         ];
 
-        var charset = new Image(),
-            obj = this;
+        for (var y = 0; y < 4; y++) {
+            for (var x = 0; x < 3; x++) {
+                var canvas = document.createElement('canvas'),
+                    ctx = canvas.getContext("2d"),
+                    offsetx = this.width * x,
+                    offsety = this.height * y,
+                    splicedImg = new Image();
 
-        charset.onload = function () {
-            for (var y = 0; y < 4; y++) {
-                for (var x = 0; x < 3; x++) {
-                    var canvas = document.createElement('canvas'),
-                        ctx = canvas.getContext("2d"),
-                        offsetx = obj.width * x,
-                        offsety = obj.height * y,
-                        splicedImg = new Image();
+                canvas.width = this.width;
+                canvas.height = this.height;
 
-                    canvas.width = obj.width;
-                    canvas.height = obj.height;
-
-                    // sourceImage, sourceOffsetX, sourceOffsetY, chunkSizeX, chunkSizeY, canvasPlacementX, canvasPlacementY, newSizeX, newSizeY)
-                    ctx.drawImage(charset, offsetx, offsety, obj.width, obj.height, 0, 0, obj.width, obj.height);
-                    splicedImg.src = canvas.toDataURL('image/png');
-                    charsetData[y][x] = splicedImg;
-                }
+                // sourceImage, sourceOffsetX, sourceOffsetY, chunkSizeX, chunkSizeY, canvasPlacementX, canvasPlacementY, newSizeX, newSizeY)
+                ctx.drawImage(charset, offsetx, offsety, this.width, this.height, 0, 0, this.width, this.height);
+                splicedImg.src = canvas.toDataURL('image/png');
+                charsetData[y][x] = splicedImg;
             }
-            callback(charsetData);
         }
-        charset.src = filename;
+        callback(charsetData);
     }
 
     move(x: number, y: number, strength: number, world: World, sound: Sound) {

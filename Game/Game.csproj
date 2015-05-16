@@ -24,14 +24,24 @@
   <ItemGroup>
     <Content Include="app.css" />
     <Content Include="index.html" />
+    <Content Include="util\underscore-min.js" />
+    <Content Include="util\underscore-min.map" />
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="game.ts" />
     <TypeScriptCompile Include="controls.ts" />
-    <TypeScriptCompile Include="jquery.d.ts" />
+    <TypeScriptCompile Include="util\createjs\createjs-lib.d.ts" />
+    <TypeScriptCompile Include="util\createjs\easeljs.d.ts" />
+    <TypeScriptCompile Include="util\createjs\preloadjs.d.ts" />
+    <TypeScriptCompile Include="util\createjs\soundjs.d.ts" />
+    <TypeScriptCompile Include="util\createjs\tweenjs.d.ts" />
+    <TypeScriptCompile Include="util\jquery.d.ts" />
     <TypeScriptCompile Include="sound.ts" />
     <TypeScriptCompile Include="sprite.ts" />
+    <TypeScriptCompile Include="util\underscore.d.ts" />
+    <TypeScriptCompile Include="util\webaudioapi\waa.d.ts" />
+    <TypeScriptCompile Include="util\webrtc\MediaStream.d.ts" />
     <TypeScriptCompile Include="world.ts" />
   </ItemGroup>
   <ItemGroup>

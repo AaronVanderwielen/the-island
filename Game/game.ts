@@ -10,6 +10,12 @@
     // Sound for each mapobject?
 }
 
+interface Asset {
+    id: string;
+    src: string;
+    value?;
+}
+
 interface ViewPort {
     startX: number;
     endX: number;
@@ -20,6 +26,7 @@ interface ViewPort {
 class Game {
     world: World;
     sound: Sound;
+    assets: Array<Asset>;
     userControls: Controls;
     userControlled: Sprite;
     audioContext;
@@ -44,19 +51,55 @@ class Game {
 
         this.fps = fps;
         this.objects = new Array();
+
+        this.assets = [
+            { id: 'char', src: '/img/char.png' },
+            { id: 'terrain', src: "/img/terrain.png" }
+        ];
     }
 
     init() {
-        this.world = new World(100, 100, 100, 5);
-        this.sound = new Sound();
-        this.userControls = new Controls(this.fps);
-        this.userControlled = new Sprite('/img/char.png');
-        this.addMapObject(this.userControlled);
+        this.loadAssets(function () {
+            var tileset = <HTMLImageElement>this.getAssetById('terrain').value;
 
-        this.onGameReady(function () {
-            this.userControls.start();
-            this.start();
+            this.world = new World(100, 100, 100, 5, tileset);
+            this.sound = new Sound();
+            this.userControls = new Controls(this.fps);
+            this.userControlled = new Sprite(this.getAssetById('char'));
+            this.addMapObject(this.userControlled);
+
+            this.onGameReady(function () {
+                this.userControls.start();
+                this.start();
+            });
         });
+    }
+
+    getAssetById(id: string) {
+        var asset = _.find(this.assets, function (a: Asset) {
+            return a.id === id;
+        });
+        return asset;
+    }
+
+    loadAssets(callback: Function) {
+        var queue = new createjs.LoadQueue();
+
+        queue.on("fileload", handleAssetLoaded, this);
+        queue.on("complete", handleComplete, this);
+
+        for (var a in this.assets) {
+            queue.loadFile({ id: this.assets[a].id, src: this.assets[a].src });
+        }
+
+        function handleAssetLoaded(event) {
+            var asset = this.getAssetById(event.item.id);
+            asset.value = event.result;
+        }
+
+        function handleComplete() {
+            callback.call(this);
+        }
     }
 
     onGameReady(callback: Function) {
@@ -116,16 +159,42 @@ class Game {
     }
 
     renderView() {
-        var ctx = this.canvas.getContext("2d");
+        var ctx = this.canvas.getContext("2d"),
+            byps = this.world.numY / this.world.sectionsY, // blocks y per section
+            bxps = this.world.numX / this.world.sectionsX, // blocks x per section
+            pyps = byps * this.world.tileSize, // pixels y per section,
+            pxps = bxps * this.world.tileSize, // pixels x per section
+            ySection = Math.floor(this.view.startY / pyps),
+            xSection = Math.floor(this.view.startX / pxps),
+            ySectionEnd = Math.floor(this.view.endY / pyps),
+            xSectionEnd = Math.floor(this.view.endX / pxps),
+            sectionStartY = this.view.startY - (ySection * pyps),
+            sectionStartX = this.view.startX - (xSection * pxps);
 
         var info = document.getElementById('view');
         info.innerHTML = "";
-        info.innerHTML += 'startX: ' + this.view.startX + '<br />';
-        info.innerHTML += 'endX: ' + this.view.endX + '<br />';
-        info.innerHTML += 'startY: ' + this.view.startY + '<br />';
-        info.innerHTML += 'endY: ' + this.view.endY;
+        info.innerHTML += 'xSection: ' + xSection + '<br />';
+        info.innerHTML += 'ySection: ' + ySection + '<br />';
 
-        ctx.drawImage(this.world.cached, this.view.startX, this.view.startY, this.resX, this.resY, 0, 0, this.resX, this.resY);
+        if (ySection === ySectionEnd && xSection === xSectionEnd) {
+            // all the needed pixels are in this section
+            var section = this.world.cached[ySection][xSection];
+            ctx.drawImage(section, sectionStartX, sectionStartY, this.resX, this.resY, 0, 0, this.resX, this.resY);
+        }
+        else {
+            if (ySection !== ySectionEnd) {
+                // need to load in some pixels from ySectionEnd
+                var sectionStart = this.world.cached[ySection][xSection],
+                    sectionEnd = this.world.cached[ySectionEnd][xSection],
+                    yOffset = sectionStartY + this.resY - pyps;
+
+                ctx.drawImage(sectionStart, sectionStartX, sectionStartY, this.resX, this.resY - yOffset, 0, 0, this.resX, this.resY - yOffset);
+                ctx.drawImage(sectionEnd, sectionStartX, 0, this.resX, yOffset, 0, this.resY - yOffset, this.resX, yOffset);
+            }
+            if (xSection !== xSectionEnd) {
+                // need lo load in some pixels from xSectionEnd
+            }
+        }
     }
 
     moveViewCenter(userSprite: Sprite) {

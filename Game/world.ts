@@ -17,6 +17,7 @@ interface Block {
 
 enum TerrainType {
     ocean,
+    shallow,
     beach,
     grass,
     dirt,
@@ -27,23 +28,40 @@ enum TerrainType {
 
 class World {
     grid: Array<Array<Block>>;
-    cached: HTMLCanvasElement;
+    tileset: HTMLImageElement;
+    cached: Array<Array<HTMLCanvasElement>>;
+    sectionsX: number;
+    sectionsY: number;
     numX: number;
     numY: number;
     tileSize: number;
     gradientSize: number;
     terrainType: TerrainType;
 
-    constructor(x, y, tileSize, gradientSize) {
+    constructor(x, y, tileSize, gradientSize, tileset) {
         this.numX = x;
         this.numY = y;
         this.tileSize = tileSize;
         this.gradientSize = gradientSize;
 
         // init grid
-        this.cached = document.createElement('canvas');
-        this.cached.width = x * tileSize;
-        this.cached.height = y * tileSize;
+        this.sectionsX = 2;
+        this.sectionsY = 2;
+
+        this.cached = [];
+        for (var sy = 0; sy < this.sectionsY; sy++) {
+            for (var sx = 0; sx < this.sectionsX; sx++) {
+                if (sx === 0) {
+                    this.cached[sy] = [];
+                }
+
+                this.cached[sy][sx] = document.createElement('canvas');
+                this.cached[sy][sx].width = (this.numX / this.sectionsX) * tileSize;
+                this.cached[sy][sx].height = (this.numY / this.sectionsX) * tileSize;
+            }
+        }
+
+        this.tileset = tileset;
 
         this.initGrid();
         this.build();
@@ -121,7 +139,7 @@ class World {
     }
 
     createMountain() {
-        this.randShape(Math.round(this.numX / 2), Math.round(this.numY / 2), this.gradientSize * 3, 1, TerrainType.rock);
+        this.randShape(Math.round(this.numX / 2), Math.round(this.numY / 2), this.gradientSize * 4, 1, TerrainType.rock);
         this.randShape(Math.round(this.numX / 2), Math.round(this.numY / 2), this.gradientSize * 2, 1, TerrainType.mountain, [TerrainType.rock]);
         this.randShape(Math.round(this.numX / 2), Math.round(this.numY / 2), Math.round(this.gradientSize / 3), 1, TerrainType.lava, [TerrainType.mountain]);
     }
@@ -252,24 +270,40 @@ class World {
     }
 
     render() {
-        var ctx = this.cached.getContext("2d");
+        for (var sy = 0; sy < this.sectionsY; sy++) {
+            for (var sx = 0; sx < this.sectionsX; sx++) {
+                var ctx = this.cached[sy][sx].getContext("2d"),
+                    startX = sx * (this.numX / this.sectionsX),
+                    endX = startX + (this.numX / this.sectionsX),
+                    startY = sy * (this.numY / this.sectionsY),
+                    endY = startY + (this.numY / this.sectionsY);
 
-        for (var y = 0; y < this.numY; y++) {
-            var row = this.grid[y];
+                for (var y = startY; y < endY; y++) {
+                    var row = this.grid[y];
 
-            for (var x = 0; x < this.numX; x++) {
-                var block = row[x];
-                this.renderBlock(block, ctx);
+                    for (var x = startX; x < endX; x++) {
+                        var block = row[x];
+                        this.renderBlock(block, sy, sx, ctx);
+                    }
+                }
             }
         }
     }
 
-    renderBlock(block: Block, ctx: CanvasRenderingContext2D) {
-        //define the colour of the square
-        ctx.fillStyle = block.bg;
+    renderBlock(block: Block, ySection: number, xSection: number, ctx: CanvasRenderingContext2D) {
+        var byps = this.numY / this.sectionsY, // blocks y per section
+            bxps = this.numX / this.sectionsX, // blocks x per section
+            startBlockY = (block.y - (ySection * byps)) * this.tileSize,
+            startBlockX = (block.x - (xSection * bxps)) * this.tileSize;
 
-        // Draw a square using the fillRect() method and fill it with the colour specified by the fillStyle attribute
-        ctx.fillRect(block.x * this.tileSize, block.y * this.tileSize, this.tileSize, this.tileSize);       
+        ctx.drawImage(this.tileset, block.type * this.tileSize, 0, this.tileSize, this.tileSize, startBlockX, startBlockY, this.tileSize, this.tileSize);
+        //else {
+        //    //define the colour of the square
+        //    ctx.fillStyle = block.bg;
+
+        //    // Draw a square using the fillRect() method and fill it with the colour specified by the fillStyle attribute
+        //    ctx.fillRect(block.x * this.tileSize, block.y * this.tileSize, this.tileSize, this.tileSize);
+        //}
     }
 
     getBlock(x: number, y: number) {
