@@ -7,29 +7,47 @@
 interface Block {
     x: number;
     y: number;
+    sectionId: string;
     type?: TerrainType;
     above?: Block;
     right?: Block;
     below?: Block;
     left?: Block;
+    upperLeft?: Block;
+    lowerLeft?: Block;
+    upperRight?: Block;
+    lowerRight?: Block;
+    borders: Function;
     bg?: string;
+    objects: Array<IMapObject>
 }
 
 enum TerrainType {
     ocean,
     shallow,
     beach,
-    grass,
     dirt,
+    grass,
     rock,
     mountain,
     lava
 }
 
+//interface ItemImages {
+//    [type: string]: HTMLImageElement;
+//}
+
 class World {
     grid: Array<Array<Block>>;
+    sections: Array<Array<HTMLCanvasElement>>;
     tileset: HTMLImageElement;
-    cached: Array<Array<HTMLCanvasElement>>;
+    itemset: HTMLImageElement;
+    byps: number;
+    bxps: number;
+    pyps: number;
+    pxps: number;
+    cached: HTMLCanvasElement;
+    cachedId: string;
     sectionsX: number;
     sectionsY: number;
     numX: number;
@@ -38,34 +56,51 @@ class World {
     gradientSize: number;
     terrainType: TerrainType;
 
-    constructor(x, y, tileSize, gradientSize, tileset) {
+    constructor(x: number, y: number, tileSize: number, gradientSize: number, tileset: HTMLImageElement, itemset: HTMLImageElement, objects: Array<IMapObject>) {
         this.numX = x;
         this.numY = y;
+
+        // sections are 25b x 25b
+        this.bxps = 25;
+        this.byps = 25;
+
         this.tileSize = tileSize;
         this.gradientSize = gradientSize;
 
         // init grid
-        this.sectionsX = 2;
-        this.sectionsY = 2;
+        this.sectionsX = this.numX / this.bxps;
+        this.sectionsY = this.numY / this.byps;
 
-        this.cached = [];
+        this.pyps = this.byps * this.tileSize; // pixels y per section,
+        this.pxps = this.bxps * this.tileSize; // pixels x per section
+
+        // create cached canvas--will be used to hold 3 x 3 sections, updated on section change
+        // this is where the viewport is extracted from
+        this.cached = document.createElement('canvas');
+        this.cached.width = this.pxps * 3;
+        this.cached.height = this.pyps * 3;
+        var ctx = this.cached.getContext('2d');
+
+        // create section canvases
+        this.sections = [];
         for (var sy = 0; sy < this.sectionsY; sy++) {
             for (var sx = 0; sx < this.sectionsX; sx++) {
                 if (sx === 0) {
-                    this.cached[sy] = [];
+                    this.sections[sy] = [];
                 }
 
-                this.cached[sy][sx] = document.createElement('canvas');
-                this.cached[sy][sx].width = (this.numX / this.sectionsX) * tileSize;
-                this.cached[sy][sx].height = (this.numY / this.sectionsX) * tileSize;
+                this.sections[sy][sx] = document.createElement('canvas');
+                this.sections[sy][sx].width = (this.numX / this.sectionsX) * tileSize;
+                this.sections[sy][sx].height = (this.numY / this.sectionsX) * tileSize;
             }
         }
 
         this.tileset = tileset;
+        this.itemset = itemset;
 
         this.initGrid();
         this.build();
-        this.render();
+        this.render(objects);
     }
 
     initGrid() {
@@ -74,10 +109,17 @@ class World {
         // initialize empty blocks in grid
         for (var y = 0; y < this.numY; y++) {
             for (var x = 0; x < this.numX; x++) {
-                var block = {
-                    x: x,
-                    y: y
-                };
+                var sectionId = this.getSectionId(y, x, 'b'),
+                    block = {
+                        x: x,
+                        y: y,
+                        sectionId: sectionId,
+                        objects: [],
+                        borders: function (terrain: TerrainType) {
+                            return this.above.type === terrain || this.right.type === terrain || this.below.type === terrain || this.left.type === terrain ||
+                                this.upperLeft.type === terrain || this.upperRight.type === terrain || this.lowerLeft.type === terrain || this.lowerRight.type === terrain;
+                        }
+                    };
 
                 if (x === 0) {
                     this.grid[y] = [];
@@ -106,21 +148,29 @@ class World {
         this.fill(this.gradientSize * 4, this.numX - (this.gradientSize * 4), this.gradientSize * 4, this.numY - (this.gradientSize * 4), TerrainType.dirt, false);
         
         // add grass patches to dirt randomly
-        this.createGrass(.02, 5);
+        this.createGrass(.05, 5);
     }
 
     createOcean() {
-        this.layerEmptyTop(0, this.numX, 0, TerrainType.ocean, TerrainType.beach, true);
-        this.layerEmptyRight(this.numX - 1, 0, this.numY, TerrainType.ocean, TerrainType.beach, true);
-        this.layerEmptyBelow(0, this.numX, this.numY - 1, TerrainType.ocean, TerrainType.beach, true);
-        this.layerEmptyLeft(0, 0, this.numY, TerrainType.ocean, TerrainType.beach, true);
+        // create deep water
+        this.layerEmptyTop(0, this.numX, 0, TerrainType.ocean, TerrainType.shallow, true);
+        this.layerEmptyRight(this.numX - 1, 0, this.numY, TerrainType.ocean, TerrainType.shallow, true);
+        this.layerEmptyBelow(0, this.numX, this.numY - 1, TerrainType.ocean, TerrainType.shallow, true);
+        this.layerEmptyLeft(0, 0, this.numY, TerrainType.ocean, TerrainType.shallow, true);
+
+        // shallow water/start of beach
+        this.layerEmptyTop(this.gradientSize, this.numX - this.gradientSize, this.gradientSize, TerrainType.shallow, TerrainType.beach);
+        this.layerEmptyRight(this.numX - this.gradientSize - 1, this.gradientSize, this.numY - this.gradientSize, TerrainType.shallow, TerrainType.beach);
+        this.layerEmptyBelow(this.gradientSize, this.numX - this.gradientSize, this.numY - this.gradientSize - 1, TerrainType.shallow, TerrainType.beach);
+        this.layerEmptyLeft(this.gradientSize, this.gradientSize, this.numY - this.gradientSize, TerrainType.shallow, TerrainType.beach);
     }
 
     createBeach() {
-        this.layerEmptyTop(this.gradientSize * 2, this.numX - (this.gradientSize * 2) + 1, this.gradientSize * 2, TerrainType.beach, TerrainType.dirt, true);
-        this.layerEmptyRight(this.numX - 1 - (this.gradientSize * 2), this.gradientSize * 2, this.numY - (this.gradientSize * 2), TerrainType.beach, TerrainType.dirt, true);
-        this.layerEmptyBelow(this.gradientSize * 2, this.numX - (this.gradientSize * 2) + 1, this.numY - 1 - (this.gradientSize * 2), TerrainType.beach, TerrainType.dirt, true);
-        this.layerEmptyLeft(this.gradientSize * 2, this.gradientSize * 2, this.numY - (this.gradientSize * 2) + 1, TerrainType.beach, TerrainType.dirt, true);
+        var gOffset = 3;
+        this.layerEmptyTop(this.gradientSize * gOffset, this.numX - (this.gradientSize * gOffset) + 1, this.gradientSize * gOffset, TerrainType.beach, TerrainType.dirt);
+        this.layerEmptyRight(this.numX - 1 - (this.gradientSize * gOffset), this.gradientSize * gOffset, this.numY - (this.gradientSize * gOffset), TerrainType.beach, TerrainType.dirt);
+        this.layerEmptyBelow(this.gradientSize * gOffset, this.numX - (this.gradientSize * gOffset) + 1, this.numY - 1 - (this.gradientSize * gOffset), TerrainType.beach, TerrainType.dirt);
+        this.layerEmptyLeft(this.gradientSize * gOffset, this.gradientSize * gOffset, this.numY - (this.gradientSize * gOffset) + 1, TerrainType.beach, TerrainType.dirt);
     }
 
     createGrass(chance: number, size: number) {
@@ -128,10 +178,11 @@ class World {
             for (var x = 0; x < this.numX; x++) {
                 var block = this.grid[y][x];
                 if (block.type === TerrainType.dirt) {
-                    // roll for chance
+                    // roll for grass
                     var rand = Math.random();
                     if (rand <= chance) {
                         this.randShape(x, y, Math.round(Math.random() * size), 1, TerrainType.grass, [TerrainType.dirt]);
+                        //this.rollForItem(block, 1, [ItemType.berry, ItemType.bush, ItemType.fern, ItemType.flower, ItemType.mushroom, ItemType.log, ItemType.rocks, ItemType.tree]);
                     }
                 }
             }
@@ -142,6 +193,30 @@ class World {
         this.randShape(Math.round(this.numX / 2), Math.round(this.numY / 2), this.gradientSize * 4, 1, TerrainType.rock);
         this.randShape(Math.round(this.numX / 2), Math.round(this.numY / 2), this.gradientSize * 2, 1, TerrainType.mountain, [TerrainType.rock]);
         this.randShape(Math.round(this.numX / 2), Math.round(this.numY / 2), Math.round(this.gradientSize / 3), 1, TerrainType.lava, [TerrainType.mountain]);
+    }
+
+    rollForItem(block: Block, chanceTypes, objects: Array<IMapObject>) {
+        // roll for chance
+        var rand = Math.random(),
+            prev = 0;
+
+        // chance types = [{ c: .1, types: [] }]
+        for (var c in chanceTypes) {
+            if (rand >= prev && rand <= chanceTypes[c].c) {
+                // now pick random item
+                var type = chanceTypes[c].types[Math.round(Math.random() * (chanceTypes[c].types.length - 1))],
+                    item = new MapItem(this.itemset, type);
+
+                item.x = item.width >= (this.tileSize/2) ? block.x * this.tileSize : block.x * this.tileSize + (this.tileSize / 2);
+                item.y = item.height >= (this.tileSize / 2) ? block.y * this.tileSize : block.y * this.tileSize + (this.tileSize / 2);
+                item.on = block;
+                item.sectionId = block.sectionId;
+
+                objects.push(item);
+                block.objects.push(item);
+            }
+            prev += chanceTypes[c].c;
+        }
     }
 
     randShape(cx: number, cy: number, d: number, smooth: number, type: TerrainType, overwrite?: Array<TerrainType>) {
@@ -179,7 +254,7 @@ class World {
         }
     }
 
-    layerEmptyTop(startX: number, endX: number, startY: number, type: TerrainType, fillType: TerrainType, overwrite: boolean) {
+    layerEmptyTop(startX: number, endX: number, startY: number, type: TerrainType, fillType: TerrainType, overwrite?: boolean) {
         var prevPush = this.gradientSize;
         for (var x = startX; x < endX; x++) {
             var random = Math.random(),
@@ -201,7 +276,7 @@ class World {
         }
     }
 
-    layerEmptyRight(startX: number, startY: number, endY: number, type: TerrainType, fillType: TerrainType, overwrite: boolean) {
+    layerEmptyRight(startX: number, startY: number, endY: number, type: TerrainType, fillType: TerrainType, overwrite?: boolean) {
         var prevPush = this.gradientSize;
         for (var y = startY; y < endY; y++) {
             var random = Math.random(),
@@ -223,7 +298,7 @@ class World {
         }
     }
 
-    layerEmptyBelow(startX: number, endX: number, startY: number, type: TerrainType, fillType: TerrainType, overwrite: boolean) {
+    layerEmptyBelow(startX: number, endX: number, startY: number, type: TerrainType, fillType: TerrainType, overwrite?: boolean) {
         var prevPush = this.gradientSize;
         for (var x = startX; x < endX; x++) {
             var random = Math.random(),
@@ -245,7 +320,7 @@ class World {
         }
     }
 
-    layerEmptyLeft(startX: number, startY: number, endY: number, type: TerrainType, fillType: TerrainType, overwrite: boolean) {
+    layerEmptyLeft(startX: number, startY: number, endY: number, type: TerrainType, fillType: TerrainType, overwrite?: boolean) {
         var prevPush = this.gradientSize;
         for (var y = startY; y < endY; y++) {
             // generate values for random edges
@@ -269,10 +344,10 @@ class World {
         }
     }
 
-    render() {
+    render(objects: Array<IMapObject>) {
         for (var sy = 0; sy < this.sectionsY; sy++) {
             for (var sx = 0; sx < this.sectionsX; sx++) {
-                var ctx = this.cached[sy][sx].getContext("2d"),
+                var ctx = this.sections[sy][sx].getContext("2d"),
                     startX = sx * (this.numX / this.sectionsX),
                     endX = startX + (this.numX / this.sectionsX),
                     startY = sy * (this.numY / this.sectionsY),
@@ -283,20 +358,57 @@ class World {
 
                     for (var x = startX; x < endX; x++) {
                         var block = row[x];
-                        this.renderBlock(block, sy, sx, ctx);
+                        this.renderBlock(block, sy, sx, ctx, objects);
                     }
                 }
             }
         }
+
+        //for (var sy = 0; sy < this.sectionsY; sy++) {
+        //    for (var sx = 0; sx < this.sectionsX; sx++) {
+        //        $('body').append(this.cached[sy][sx]);
+        //    }
+        //}
     }
 
-    renderBlock(block: Block, ySection: number, xSection: number, ctx: CanvasRenderingContext2D) {
-        var byps = this.numY / this.sectionsY, // blocks y per section
-            bxps = this.numX / this.sectionsX, // blocks x per section
-            startBlockY = (block.y - (ySection * byps)) * this.tileSize,
-            startBlockX = (block.x - (xSection * bxps)) * this.tileSize;
+    renderBlock(block: Block, ySection: number, xSection: number, ctx: CanvasRenderingContext2D, objects: Array<IMapObject>) {
+        var startBlockY = (block.y - (ySection * this.byps)) * this.tileSize,
+            startBlockX = (block.x - (xSection * this.bxps)) * this.tileSize;
 
         ctx.drawImage(this.tileset, block.type * this.tileSize, 0, this.tileSize, this.tileSize, startBlockX, startBlockY, this.tileSize, this.tileSize);
+
+        var chanceTypes;
+        if (block.type === TerrainType.beach) {
+            chanceTypes = [
+                { c: .001, types: [ItemType.rock, ItemType.rocks] }
+            ];
+            this.rollForItem(block, chanceTypes, objects);
+        }
+        else if (block.type === TerrainType.dirt) {
+            chanceTypes = [
+                { c: .01, types: [ItemType.rock, ItemType.rocks, ItemType.bone] }
+            ];
+            this.rollForItem(block, chanceTypes, objects);
+        }
+        else if (block.type === TerrainType.grass) {
+            chanceTypes = [
+                { c: .001, types: [ItemType.rock, ItemType.rocks] },
+                { c: .01, types: [ItemType.berry, ItemType.bush, ItemType.fern, ItemType.flower, ItemType.mushroom, ItemType.plant, ItemType.log] },
+                { c: .04, types: [ItemType.tree] }
+            ];
+            this.rollForItem(block, chanceTypes, objects);
+        }
+        else if (block.type === TerrainType.rock) {
+            chanceTypes = [
+                { c: .05, types: [ItemType.rock, ItemType.rocks] }
+            ];
+            this.rollForItem(block, chanceTypes, objects);
+        }
+        
+        //for (var i in block.items) {
+        //    var item = block.items[i];
+        //    this.placeItem(item.type, ctx, startBlockX + (this.tileSize / 2), startBlockY + (this.tileSize / 2));
+        //}
         //else {
         //    //define the colour of the square
         //    ctx.fillStyle = block.bg;
@@ -306,6 +418,28 @@ class World {
         //}
     }
 
+    refreshCached(ySection: number, xSection: number) {
+        var cachedCtx = this.cached.getContext('2d');
+        var cy = 0;
+        for (var sy = ySection - 1; sy <= ySection + 1; sy++) {
+            var cx = 0;
+            for (var sx = xSection - 1; sx <= xSection + 1; sx++) {
+                if (this.sections[sy] && this.sections[sy][sx]) {
+                    // draw section onto cached
+                    cachedCtx.drawImage(this.sections[sy][sx], 0, 0, this.pxps, this.pyps, cx * this.pxps, cy * this.pyps, this.pxps, this.pyps);
+                }
+                else {
+                    // blank section
+                    cachedCtx.fillStyle = "#000";
+                    cachedCtx.fillRect(cx * this.pxps, cy * this.pyps, this.pxps, this.pyps)
+                }
+                cx++;
+            }
+            cy++;
+        }
+        this.cachedId = ySection + "," + xSection;
+    }
+
     getBlock(x: number, y: number) {
         var yIndex = Math.floor(y / this.tileSize),
             xIndex = Math.floor(x / this.tileSize);
@@ -313,11 +447,25 @@ class World {
         return this.grid[yIndex][xIndex];
     }
 
+    getSectionId(x: number, y: number, measurement: string) {
+        if (measurement === "p") {
+            return Math.floor(y / this.pyps) + "," + Math.floor(x / this.pxps);
+        }
+        else if (measurement === "b") {
+            Math.floor(y / this.byps) + "," + Math.floor(x / this.bxps)
+        }
+    }
+
     setNearbyPointers(block) {
         block.above = block.y > 0 ? this.grid[block.y - 1][block.x] : null;
-        block.below = block.y < this.numY - 2 ? this.grid[block.y + 1][block.x] : null;
+        block.below = block.y < this.numY - 1 ? this.grid[block.y + 1][block.x] : null;
         block.left = block.x > 0 ? this.grid[block.y][block.x - 1] : null;
-        block.right = block.x < this.numX - 2 ? this.grid[block.y][block.x + 1] : null;
+        block.right = block.x < this.numX - 1 ? this.grid[block.y][block.x + 1] : null;
+
+        block.upperLeft = block.x > 0 && block.y > 0 ? this.grid[block.y - 1][block.x - 1] : null;
+        block.upperRight = block.x < this.numX - 1 && block.y > 0 ? this.grid[block.y - 1][block.x + 1] : null;
+        block.lowerLeft = block.x > 0 && block.y < this.numY - 1 ? this.grid[block.y + 1][block.x - 1] : null;
+        block.lowerRight = block.x < this.numX - 1 && block.y < this.numY - 1 ? this.grid[block.y + 1][block.x + 1] : null;
     }
 
     fill(startX: number, endX: number, startY: number, endY: number, fillType: TerrainType, overwrite: boolean) {
@@ -330,48 +478,18 @@ class World {
         }
     }
 
-    setTerrainType(block: Block) {
-        if (block.type !== undefined && block.type !== null) {
-            return;
-        }
-        else if (this.bordersDirt(block)) {
-            var chances = {};
-
-            if (((block.x < (this.numX / 2)) && block.x < this.gradientSize * 5) || // left side and close to left
-                ((block.x > (this.numX / 2)) && block.x > this.numX - (this.gradientSize * 5)) || // left side and close to left
-                ((block.y < (this.numY / 2)) && block.y < this.gradientSize * 5) || // left side and close to left
-                ((block.y > (this.numY / 2)) && block.y > this.numY - (this.gradientSize * 5))) { // left side and close to left
-                chances[TerrainType.dirt] = .8;
-                chances[TerrainType.grass] = .2;
-            }
-            else {
-                chances[TerrainType.dirt] = .6;
-                chances[TerrainType.grass] = .4;
-            }
-            this.chanceType(block, chances);
-        }
-        else if (this.bordersGrass(block)) {
-            var chances = {};
-            chances[TerrainType.grass] = .8;
-            chances[TerrainType.dirt] = .1;
-            chances[TerrainType.rock] = .1;
-            this.chanceType(block, chances);
-        }
-        else {
-            var chances = {};
-            chances[TerrainType.rock] = 1;
-            this.chanceType(block, chances);
-        }
-    }
-
     typeIsSet(block: Block) {
         return block.type !== undefined && block.type !== null;
     }
 
     setType(block: Block, type: TerrainType) {
         if (type == TerrainType.ocean) {
-            block.bg = "#0af";
+            block.bg = "#08c";
             block.type = TerrainType.ocean;
+        }
+        else if (type == TerrainType.shallow) {
+            block.bg = "#0af";
+            block.type = TerrainType.shallow;
         }
         else if (type == TerrainType.beach) {
             block.bg = "#eda";
@@ -395,7 +513,7 @@ class World {
         }
         else if (type == TerrainType.lava) {
             block.bg = "#600";
-            block.type = TerrainType.mountain;
+            block.type = TerrainType.lava;
         }
     }
 
@@ -409,19 +527,5 @@ class World {
             }
             start += chance[c];
         }
-    }
-
-    bordersDirt(block) {
-        return block.above.type === TerrainType.dirt ||
-            //block.right.type === TerrainType.dirt ||
-            //block.below.type === TerrainType.dirt ||
-            block.left.type === TerrainType.dirt;
-    }
-
-    bordersGrass(block) {
-        return block.above.type === TerrainType.grass ||
-            //block.right.type === TerrainType.grass ||
-            //block.below.type === TerrainType.grass ||
-            block.left.type === TerrainType.grass;
     }
 }
