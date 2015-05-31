@@ -12,11 +12,10 @@ interface ViewPort {
 }
 
 class Game {
+    player: Player;
     world: World;
     sound: Sound;
     assets: Array<Asset>;
-    userControls: Controls;
-    userControlled: Sprite;
     audioContext;
     currentOsc;
     currentGain;
@@ -43,7 +42,7 @@ class Game {
         this.assets = [
             { id: 'char', src: '/img/char.png' },
             { id: 'terrain', src: "/img/terrain.png" },
-            { id: 'items', src: "/img/tileSetA.png" }
+            { id: 'items', src: "/img/itemset.png" }
         ];
     }
 
@@ -52,17 +51,18 @@ class Game {
             var tileset = <HTMLImageElement>this.getAssetById('terrain').value,
                 itemset = <HTMLImageElement>this.getAssetById('items').value;
 
-            this.world = new World(200, 200, 100, 5, tileset, itemset, this.objects);
+            this.world = new World(100, 100, 100, 5, tileset, itemset, this.objects);
             this.sound = new Sound();
-            this.userControls = new Controls(this.fps);
-            this.userControlled = new Sprite(this.getAssetById('char'));
 
-            this.userControlled.x = 2000;
-            this.userControlled.y = 2000;
-            this.userControlled.sectionId = this.world.getSectionId(2000, 2000, 'p');
-            this.objects.push(this.userControlled);
+            this.player = new Player();
+            this.player.controls = new Controls(this.fps);
+            this.player.sprite = new Sprite(this.getAssetById('char'));
+            this.player.sprite.x = 2000;
+            this.player.sprite.y = 2000;
+            this.player.sprite.sectionId = this.world.getSectionId(2000, 2000, 'p');
+            this.objects.push(this.player.sprite);
 
-            this.userControls.start();
+            this.player.controls.start();
             this.start();
         });
     }
@@ -107,23 +107,26 @@ class Game {
     }
 
     stateUpdate() {
-        this.moveUserControlled();
+        this.player.update(this.world, this.sound);
     }
 
     refresh() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.moveViewCenter(this.userControlled);
+        this.moveViewCenter(this.player.sprite);
         this.drawMapObjects();
-    }
-
-    moveUserControlled() {
-        this.userControlled.move(this.userControls.x, this.userControls.y, this.userControls.strength, this.world, this.sound);
+        this.player.inventory.draw(this.canvas);
     }
 
     drawMapObjects() {
         this.objects = _.sortBy(this.objects, function (o) {
-            return o.z;
+            var sortBy = o.z.toString();
+
+            if (o.type == MapObjectType.sprite) sortBy += (o.passing ? "0" : "2");
+            else sortBy += "1";
+
+            return sortBy;
         });
+
         for (var o in this.objects) {
             this.objects[o].draw(this.ctx, this.view);
         }
@@ -131,8 +134,8 @@ class Game {
 
     renderView() {
         var ctx = this.canvas.getContext("2d"),
-            ySection = Math.floor(this.userControlled.y / this.world.pyps),
-            xSection = Math.floor(this.userControlled.x / this.world.pxps),
+            ySection = Math.floor(this.player.sprite.y / this.world.pyps),
+            xSection = Math.floor(this.player.sprite.x / this.world.pxps),
             cachedId = ySection + "," + xSection,
             cachedStartY = this.view.startY - ((ySection - 1) * this.world.pyps),
             cachedStartX = this.view.startX - ((xSection - 1) * this.world.pxps);

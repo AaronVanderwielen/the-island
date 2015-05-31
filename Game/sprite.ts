@@ -15,6 +15,10 @@
     stepDir: number;
     currStep: number;
     on: Block;
+    slow: number;
+    pass: boolean;
+    passSlow: number;
+    passing: boolean;
 
     constructor(asset: Asset) {
         var sprite = this;
@@ -32,7 +36,12 @@
         sprite.stepCounter = 0;
         sprite.stepDir = 1;
 
-        sprite.yAdjust = 0; // used to cut sprite off early, like when partly underwater
+        sprite.yAdjust = 1; // used to cut sprite off early, like when partly underwater
+        sprite.slow = 1;
+
+        sprite.pass = false;
+        sprite.passSlow = 0;
+        sprite.passing = false;
 
         sprite.importSet(asset.value, function (set) {
             sprite.set = set;
@@ -72,36 +81,51 @@
     }
 
     move(x: number, y: number, strength: number, world: World, sound: Sound) {
+
         var note = [50, .1, .4, 'triangle'];
 
-        var nextX = Math.round(this.x + (x * strength * 2)),
-            nextY = Math.round(this.y + (y * strength * 2)),
-            ifSlowedX = Math.round(this.x + (x * strength)),
-            ifSlowedY = Math.round(this.y + (y * strength)),
-            nextBlock = world.getBlock(nextX, nextY + this.yAdjust),
+        var d = Math.ceil((strength * 2) * this.slow),
+            nextY = Math.round(this.y + (y * d)),
+            nextX = Math.round(this.x + (x * d)),
+            yOffset = Math.round(-(this.height * (1 - this.yAdjust))),
+            nextBlock = world.getBlock(nextX, nextY + yOffset),
             canMove = true;
+
+        if (nextBlock.type === TerrainType.shallow) {
+            this.slow = this.yAdjust > .75 ? .75 : this.yAdjust > .65 ? .5 : .25;
+            note = [43.65, .3, .4, 'sawtooth'];
+        }
+        else if (nextBlock.type === TerrainType.ocean || nextBlock.type === TerrainType.mountain) {
+            canMove = false;
+        }
+        else {
+            this.slow = 1;
+        }
 
         this.on = nextBlock;
 
-        if (strength < 2) {
+        if (d < 4) {
             note = [50, .1, .1, 'triangle'];
         }
-        if (nextBlock.type === TerrainType.shallow) {
-            nextX = ifSlowedX;
-            nextY = ifSlowedY;
-            strength = strength / 2;
-            note = [43.65, .3, .4, 'sawtooth'];
-        }
 
-        // check if can move
-        if (nextBlock.type === TerrainType.ocean || nextBlock.type === TerrainType.mountain) {
-            canMove = false;
-        }
-        else if (nextBlock.objects.length > 0) {
-            for (var o in nextBlock.objects) {
-                if (nextBlock.objects[o].z === this.z && nextBlock.objects[o].onItem(nextY, nextX)) {
-                    canMove = false;
+
+        if (canMove) {
+            if (nextBlock.objects.length > 0) {
+                this.passing = false;
+                for (var o in nextBlock.objects) {
+                    if (nextBlock.objects[o].z === this.z && nextBlock.objects[o].onItem(nextY, nextX)) {
+                        if (nextBlock.objects[o].pass) {
+                            this.slow = nextBlock.objects[o].passSlow;
+                            this.passing = true;
+                        }
+                        else {
+                            canMove = false;
+                        }
+                    }
                 }
+            }
+            else {
+                this.passing = false;
             }
         }
 
@@ -110,7 +134,7 @@
         info2.innerHTML = nextBlock.type.toString();
 
         if (strength > 0) {
-            if (!canMove) {
+            if (!canMove || d == 0) {
                 this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
             }
             else {
@@ -147,24 +171,24 @@
         this.img = this.set[this.currAnim][this.currStep];
 
         if (this.on.type === TerrainType.shallow || this.on.type === TerrainType.ocean) {
-            var bordersBeach = this.on.borders(TerrainType.beach),
-                bordersOcean = this.on.borders(TerrainType.ocean);
+            var bordersLand = this.on.borders([TerrainType.beach, TerrainType.dirt, TerrainType.grass, TerrainType.rock]),
+                bordersOcean = this.on.borders([TerrainType.ocean]);
 
-            if ((bordersBeach && bordersOcean) || (!bordersBeach && !bordersOcean)) {
-                this.yAdjust = -(this.height * .25);
-                ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height * .75, centeredX, centeredY, this.width, this.height * .75);
+            if ((bordersLand && bordersOcean) || (!bordersLand && !bordersOcean)) {
+                this.yAdjust = .75;
+                ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height * this.yAdjust, centeredX, centeredY, this.width, this.height * this.yAdjust);
             }
-            else if (bordersBeach) {
-                this.yAdjust = -(this.height * .15);
-                ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height * .85, centeredX, centeredY, this.width, this.height * .85);
+            else if (bordersLand) {
+                this.yAdjust = .85;
+                ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height * this.yAdjust, centeredX, centeredY, this.width, this.height * this.yAdjust);
             }
             else if (bordersOcean) {
-                this.yAdjust = -(this.height * .35);
-                ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height * .65, centeredX, centeredY, this.width, this.height * .65);
+                this.yAdjust = .65;
+                ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height * this.yAdjust, centeredX, centeredY, this.width, this.height * this.yAdjust);
             }
         }
         else {
-            this.yAdjust = 0;
+            this.yAdjust = 1;
             ctx.drawImage(this.img, 0, 0, this.width, this.height, centeredX, centeredY, this.width, this.height);
         }
     }

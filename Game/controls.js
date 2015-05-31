@@ -4,42 +4,44 @@ var Controls = (function () {
         this.x = 0;
         this.y = 0;
         this.strength = 0;
+        this.actions = [];
     }
     Controls.prototype.report = function (sprite) {
         var gp = navigator['getGamepads']()[0];
         for (var i = 0; i < gp.buttons.length; i++) {
+            var existingAction = _.find(this.actions, function (a) {
+                return a.button === i;
+            });
             if (gp.buttons[i].pressed) {
                 console.log(i);
+                if (!existingAction) {
+                    // new action
+                    this.actions.push({
+                        button: i,
+                        recorded: false,
+                        fade: 0
+                    });
+                }
+            }
+            else {
+                // no longer holding button
+                if (existingAction) {
+                    // iterate time spent not holding
+                    existingAction.fade++;
+                    if (existingAction.fade > this.fps) {
+                        // remove from actions
+                        this.actions = _.reject(this.actions, function (a) {
+                            return a.button === i;
+                        });
+                    }
+                }
             }
         }
         if (Math.abs(gp.axes[1]) > 0.1 || Math.abs(gp.axes[0]) > 0.1) {
             var x = gp.axes[0], y = gp.axes[1], c = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)), strength = c < .2 ? 0 : (c < .8 ? 1 : 2);
-            //quadrant,
-            //o,
-            //angle,
-            //degrees;
-            //if (x >= 0 && y >= 0) {
-            //    quadrant = 1;
-            //    o = y;
-            //}
-            //else if (x <= 0 && y >= 0) {
-            //    quadrant = 2;
-            //    o = x;
-            //}
-            //else if (x <= 0 && y <= 0) {
-            //    quadrant = 3;
-            //    o = y;
-            //}
-            //else if (x >= 0 && y <= 0) {
-            //    quadrant = 4;
-            //    o = x;
-            //}
-            //angle = Math.abs(Math.sin(o / c)) * 100;
-            //angle += ((quadrant - 1) * 90);
-            //console.log("angle: " + angle);
             this.x = x;
             this.y = y;
-            this.strength = strength;
+            this.strength = gp.buttons[7].pressed ? strength * 2 : strength;
         }
         else {
             this.strength = 0;

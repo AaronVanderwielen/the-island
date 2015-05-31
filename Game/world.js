@@ -60,7 +60,7 @@ var World = (function () {
                     sectionId: sectionId,
                     objects: [],
                     borders: function (terrain) {
-                        return this.above.type === terrain || this.right.type === terrain || this.below.type === terrain || this.left.type === terrain || this.upperLeft.type === terrain || this.upperRight.type === terrain || this.lowerLeft.type === terrain || this.lowerRight.type === terrain;
+                        return terrain.indexOf(this.above.type) != -1 || terrain.indexOf(this.right.type) != -1 || terrain.indexOf(this.below.type) != -1 || terrain.indexOf(this.left.type) != -1 || terrain.indexOf(this.upperLeft.type) != -1 || terrain.indexOf(this.upperRight.type) != -1 || terrain.indexOf(this.lowerLeft.type) != -1 || terrain.indexOf(this.lowerRight.type) != -1;
                     }
                 };
                 if (x === 0) {
@@ -84,7 +84,8 @@ var World = (function () {
         // fill with dirt
         this.fill(this.gradientSize * 4, this.numX - (this.gradientSize * 4), this.gradientSize * 4, this.numY - (this.gradientSize * 4), 3 /* dirt */, false);
         // add grass patches to dirt randomly
-        this.createGrass(.05, 5);
+        this.createGrass(.03, 5);
+        this.createRiversAndLakes(.05, .01);
     };
     World.prototype.createOcean = function () {
         // create deep water
@@ -124,11 +125,81 @@ var World = (function () {
         this.randShape(Math.round(this.numX / 2), Math.round(this.numY / 2), this.gradientSize * 2, 1, 6 /* mountain */, [5 /* rock */]);
         this.randShape(Math.round(this.numX / 2), Math.round(this.numY / 2), Math.round(this.gradientSize / 3), 1, 7 /* lava */, [6 /* mountain */]);
     };
+    World.prototype.createRiversAndLakes = function (riverChance, lakeChance) {
+        for (var y = 0; y < this.numY; y++) {
+            if (y < this.gradientSize * 3 || y > this.numY - (this.gradientSize * 3)) {
+                for (var x = 0; x < this.numX; x++) {
+                    if (x < this.gradientSize * 3 || x > this.numX - (this.gradientSize * 3)) {
+                        var block = this.grid[y][x];
+                        if (block.type === 1 /* shallow */) {
+                            // roll for river
+                            var riverRoll = Math.random();
+                            if (riverRoll <= riverChance) {
+                                console.log('river starting at ' + y + ',' + x);
+                                // now snake towards mountain
+                                var distX = (this.numX / 3) - block.x, distY = (this.numY / 2) - block.y, nextX = block.x, nextY = block.y, prevDir = (block.x > this.gradientSize * 4 && block.x < this.numX - this.gradientSize * 4) ? 'y' : 'x', nextBlock = block;
+                                while ((distX !== 0 || distY !== 0) && block.type !== 6 /* mountain */) {
+                                    // roll for lake
+                                    var lakeRoll = Math.random();
+                                    if (lakeRoll <= lakeChance) {
+                                        console.log('river ending with lake at ' + nextBlock.y + ',' + nextBlock.x);
+                                        this.randShape(nextBlock.x, nextBlock.y, Math.ceil(Math.random() * (this.gradientSize)), 1, 0 /* ocean */, [1 /* shallow */, 2 /* beach */, 3 /* dirt */, 4 /* grass */, 5 /* rock */]);
+                                        this.randShape(nextBlock.x, nextBlock.y, Math.ceil(this.gradientSize + (Math.random() * this.gradientSize)), 1, 1 /* shallow */, [2 /* beach */, 3 /* dirt */, 4 /* grass */, 5 /* rock */]);
+                                        break;
+                                    }
+                                    else {
+                                        this.randShape(nextBlock.x, nextBlock.y, Math.ceil(Math.random() * (this.gradientSize / 2)), 0, 1 /* shallow */, [2 /* beach */, 3 /* dirt */, 4 /* grass */, 5 /* rock */]);
+                                        var chanceX = Math.random(), chanceY = Math.random();
+                                        if (distX !== 0 && chanceX < (prevDir === 'x' ? .8 : .2)) {
+                                            prevDir = 'x';
+                                            if (distX < 0) {
+                                                nextX--;
+                                            }
+                                            else {
+                                                nextX++;
+                                            }
+                                        }
+                                        if (distY !== 0 && chanceY < (prevDir === 'y' ? .8 : .2)) {
+                                            prevDir = 'y';
+                                            if (distY < 0) {
+                                                nextY--;
+                                            }
+                                            else {
+                                                nextY++;
+                                            }
+                                        }
+                                        nextBlock = this.grid[nextY][nextX];
+                                        // recalculate distance to center
+                                        distX = (this.numX / 2) - nextBlock.x;
+                                        distY = (this.numY / 2) - nextBlock.y;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for (var y = 0; y < this.numY; y++) {
+            for (var x = 0; x < this.numX; x++) {
+                var block = this.grid[y][x];
+                if (block.type == 4 /* grass */ && !block.borders([1 /* shallow */])) {
+                    // roll for lake
+                    var roll = Math.random();
+                    if (roll < .001) {
+                        console.log("creating lake at " + nextBlock.y + ',' + nextBlock.x);
+                        this.randShape(nextBlock.x, nextBlock.y, Math.ceil(Math.random() * (this.gradientSize)), 1, 0 /* ocean */, [1 /* shallow */, 2 /* beach */, 3 /* dirt */, 4 /* grass */, 5 /* rock */]);
+                        this.randShape(nextBlock.x, nextBlock.y, Math.ceil(this.gradientSize + (Math.random() * this.gradientSize)), 1, 1 /* shallow */, [2 /* beach */, 3 /* dirt */, 4 /* grass */, 5 /* rock */]);
+                    }
+                }
+            }
+        }
+    };
     World.prototype.rollForItem = function (block, chanceTypes, objects) {
         // roll for chance
         var rand = Math.random(), prev = 0;
         for (var c in chanceTypes) {
-            if (rand >= prev && rand <= chanceTypes[c].c) {
+            if (rand >= prev && rand <= prev + chanceTypes[c].c) {
                 // now pick random item
                 var type = chanceTypes[c].types[Math.round(Math.random() * (chanceTypes[c].types.length - 1))], item = new MapItem(this.itemset, type);
                 item.x = item.width >= (this.tileSize / 2) ? block.x * this.tileSize : block.x * this.tileSize + (this.tileSize / 2);
@@ -143,6 +214,14 @@ var World = (function () {
     };
     World.prototype.randShape = function (cx, cy, d, smooth, type, overwrite) {
         var startX = Math.round(cx - d - (d * Math.random())), endX = Math.round(cx + d + (d * Math.random())), startY = cy - d, endY = cy + d, prevPushA = 0, prevPushB = 0;
+        startX = startX >= 0 ? startX : 0;
+        startX = startX < this.numX ? startX : this.numX - 1;
+        endX = endX >= 0 ? endX : 0;
+        endX = endX < this.numX ? endX : this.numX - 1;
+        startY = startY >= 0 ? startY : 0;
+        startY = startY < this.numY ? startY : this.numY - 1;
+        endY = endY >= 0 ? endY : 0;
+        endY = endY < this.numY ? endY : this.numY - 1;
         for (var x = startX; x <= endX; x++) {
             var xFactor = d - Math.abs(cx - x), pushA = Math.round(d * Math.random()) + (xFactor > d / 2 ? d / 2 : xFactor), evenedA = pushA, pushB = Math.round(d * Math.random()) + (xFactor > d / 2 ? d / 2 : xFactor), evenedB = pushB;
             for (var s = 0; s < smooth; s++) {
@@ -245,7 +324,7 @@ var World = (function () {
         }
         //for (var sy = 0; sy < this.sectionsY; sy++) {
         //    for (var sx = 0; sx < this.sectionsX; sx++) {
-        //        $('body').append(this.cached[sy][sx]);
+        //        $('body').append(this.sections[sy][sx]);
         //    }
         //}
     };
@@ -255,27 +334,30 @@ var World = (function () {
         var chanceTypes;
         if (block.type === 2 /* beach */) {
             chanceTypes = [
-                { c: .001, types: [8 /* rock */, 7 /* rocks */] }
+                { c: .005, types: [12 /* rockA */, 13 /* rockB */, 14 /* rockC */, 19 /* bone */] }
             ];
             this.rollForItem(block, chanceTypes, objects);
         }
         else if (block.type === 3 /* dirt */) {
             chanceTypes = [
-                { c: .01, types: [8 /* rock */, 7 /* rocks */, 9 /* bone */] }
+                { c: .01, types: [12 /* rockA */, 13 /* rockB */, 14 /* rockC */, 19 /* bone */] },
+                { c: .005, types: [24 /* clay */, 20 /* log */, 21 /* stickA */, 22 /* stickB */] }
             ];
             this.rollForItem(block, chanceTypes, objects);
         }
         else if (block.type === 4 /* grass */) {
             chanceTypes = [
-                { c: .001, types: [8 /* rock */, 7 /* rocks */] },
-                { c: .01, types: [1 /* berry */, 2 /* bush */, 3 /* fern */, 4 /* flower */, 5 /* mushroom */, 6 /* plant */, 10 /* log */] },
-                { c: .04, types: [0 /* tree */] }
+                { c: .005, types: [17 /* rocksA */, 18 /* rocksB */, 15 /* rockD */, 16 /* rockE */] },
+                { c: .005, types: [19 /* bone */, 24 /* clay */, 23 /* hemp */, 21 /* stickA */, 22 /* stickB */] },
+                { c: .1, types: [7 /* grassA */, 8 /* grassB */, 9 /* grassC */, 10 /* grassD */] },
+                { c: .01, types: [1 /* berry */, 2 /* bush */, 3 /* fern */, 4 /* flowerA */, 5 /* flowerB */, 6 /* mushroom */, 11 /* plant */, 20 /* log */] },
+                { c: .05, types: [0 /* tree */] }
             ];
             this.rollForItem(block, chanceTypes, objects);
         }
         else if (block.type === 5 /* rock */) {
             chanceTypes = [
-                { c: .05, types: [8 /* rock */, 7 /* rocks */] }
+                { c: .05, types: [12 /* rockA */, 13 /* rockB */, 14 /* rockC */] }
             ];
             this.rollForItem(block, chanceTypes, objects);
         }

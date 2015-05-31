@@ -1,7 +1,7 @@
 var Sprite = (function () {
     function Sprite(asset) {
         var sprite = this;
-        sprite.type = 0 /* sprite */;
+        sprite.type = 1 /* sprite */;
         sprite.height = 96;
         sprite.width = 72;
         sprite.set = null;
@@ -10,7 +10,11 @@ var Sprite = (function () {
         sprite.currStep = 1;
         sprite.stepCounter = 0;
         sprite.stepDir = 1;
-        sprite.yAdjust = 0; // used to cut sprite off early, like when partly underwater
+        sprite.yAdjust = 1; // used to cut sprite off early, like when partly underwater
+        sprite.slow = 1;
+        sprite.pass = false;
+        sprite.passSlow = 0;
+        sprite.passing = false;
         sprite.importSet(asset.value, function (set) {
             sprite.set = set;
         });
@@ -40,33 +44,45 @@ var Sprite = (function () {
     };
     Sprite.prototype.move = function (x, y, strength, world, sound) {
         var note = [50, .1, .4, 'triangle'];
-        var nextX = Math.round(this.x + (x * strength * 2)), nextY = Math.round(this.y + (y * strength * 2)), ifSlowedX = Math.round(this.x + (x * strength)), ifSlowedY = Math.round(this.y + (y * strength)), nextBlock = world.getBlock(nextX, nextY + this.yAdjust), canMove = true;
-        this.on = nextBlock;
-        if (strength < 2) {
-            note = [50, .1, .1, 'triangle'];
-        }
+        var d = Math.ceil((strength * 2) * this.slow), nextY = Math.round(this.y + (y * d)), nextX = Math.round(this.x + (x * d)), yOffset = Math.round(-(this.height * (1 - this.yAdjust))), nextBlock = world.getBlock(nextX, nextY + yOffset), canMove = true;
         if (nextBlock.type === 1 /* shallow */) {
-            nextX = ifSlowedX;
-            nextY = ifSlowedY;
-            strength = strength / 2;
+            this.slow = this.yAdjust > .75 ? .75 : this.yAdjust > .65 ? .5 : .25;
             note = [43.65, .3, .4, 'sawtooth'];
         }
-        // check if can move
-        if (nextBlock.type === 0 /* ocean */ || nextBlock.type === 6 /* mountain */) {
+        else if (nextBlock.type === 0 /* ocean */ || nextBlock.type === 6 /* mountain */) {
             canMove = false;
         }
-        else if (nextBlock.objects.length > 0) {
-            for (var o in nextBlock.objects) {
-                if (nextBlock.objects[o].z === this.z && nextBlock.objects[o].onItem(nextY, nextX)) {
-                    canMove = false;
+        else {
+            this.slow = 1;
+        }
+        this.on = nextBlock;
+        if (d < 4) {
+            note = [50, .1, .1, 'triangle'];
+        }
+        if (canMove) {
+            if (nextBlock.objects.length > 0) {
+                this.passing = false;
+                for (var o in nextBlock.objects) {
+                    if (nextBlock.objects[o].z === this.z && nextBlock.objects[o].onItem(nextY, nextX)) {
+                        if (nextBlock.objects[o].pass) {
+                            this.slow = nextBlock.objects[o].passSlow;
+                            this.passing = true;
+                        }
+                        else {
+                            canMove = false;
+                        }
+                    }
                 }
+            }
+            else {
+                this.passing = false;
             }
         }
         // logging
         var info2 = document.getElementById('tile');
         info2.innerHTML = nextBlock.type.toString();
         if (strength > 0) {
-            if (!canMove) {
+            if (!canMove || d == 0) {
                 this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
             }
             else {
@@ -94,22 +110,22 @@ var Sprite = (function () {
         var offsetX = this.x - (this.width / 2.2), offsetY = this.y - (.9 * this.height), centeredX = offsetX - view.startX, centeredY = offsetY - view.startY;
         this.img = this.set[this.currAnim][this.currStep];
         if (this.on.type === 1 /* shallow */ || this.on.type === 0 /* ocean */) {
-            var bordersBeach = this.on.borders(2 /* beach */), bordersOcean = this.on.borders(0 /* ocean */);
-            if ((bordersBeach && bordersOcean) || (!bordersBeach && !bordersOcean)) {
-                this.yAdjust = -(this.height * .25);
-                ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height * .75, centeredX, centeredY, this.width, this.height * .75);
+            var bordersLand = this.on.borders([2 /* beach */, 3 /* dirt */, 4 /* grass */, 5 /* rock */]), bordersOcean = this.on.borders([0 /* ocean */]);
+            if ((bordersLand && bordersOcean) || (!bordersLand && !bordersOcean)) {
+                this.yAdjust = .75;
+                ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height * this.yAdjust, centeredX, centeredY, this.width, this.height * this.yAdjust);
             }
-            else if (bordersBeach) {
-                this.yAdjust = -(this.height * .15);
-                ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height * .85, centeredX, centeredY, this.width, this.height * .85);
+            else if (bordersLand) {
+                this.yAdjust = .85;
+                ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height * this.yAdjust, centeredX, centeredY, this.width, this.height * this.yAdjust);
             }
             else if (bordersOcean) {
-                this.yAdjust = -(this.height * .35);
-                ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height * .65, centeredX, centeredY, this.width, this.height * .65);
+                this.yAdjust = .65;
+                ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height * this.yAdjust, centeredX, centeredY, this.width, this.height * this.yAdjust);
             }
         }
         else {
-            this.yAdjust = 0;
+            this.yAdjust = 1;
             ctx.drawImage(this.img, 0, 0, this.width, this.height, centeredX, centeredY, this.width, this.height);
         }
     };

@@ -31,7 +31,9 @@
   <ItemGroup>
     <TypeScriptCompile Include="game.ts" />
     <TypeScriptCompile Include="controls.ts" />
+    <TypeScriptCompile Include="inventory.ts" />
     <TypeScriptCompile Include="mapItem.ts" />
+    <TypeScriptCompile Include="player.ts" />
     <TypeScriptCompile Include="util\createjs\createjs-lib.d.ts" />
     <TypeScriptCompile Include="util\createjs\easeljs.d.ts" />
     <TypeScriptCompile Include="util\createjs\preloadjs.d.ts" />
