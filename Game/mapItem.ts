@@ -1,6 +1,8 @@
 ﻿interface IMapObject {
-    type: MapObjectType;
+    id: string;
+    mapObjectType: MapObjectType;
     img: HTMLImageElement;
+    on: Block;
     x: number;
     y: number;
     z: number;
@@ -12,6 +14,7 @@
     pass: boolean;
     passSlow: number;
     passing: boolean;
+    canPickup: boolean;
     // Sound for each mapobject?
 }
 
@@ -54,7 +57,8 @@ enum ItemType {
 }
 
 class MapItem implements IMapObject {
-    type: MapObjectType;
+    id: string;
+    mapObjectType: MapObjectType;
     img: HTMLImageElement;
     itemType: ItemType;
     x: number;
@@ -67,38 +71,120 @@ class MapItem implements IMapObject {
     pass: boolean;
     passSlow: number;
     passing: boolean;
+    canPickup: boolean;
+    stack: number;
 
-    constructor(itemset: HTMLImageElement, type: ItemType) {
-        this.type = MapObjectType.item;
-        this.getItem(itemset, type);
+    constructor(itemset: HTMLImageElement, type: ItemType, droppedItem?: InventoryItem, stack?: number) {
+        if (droppedItem) {
+            this.createFromInventoryItem(itemset, droppedItem, stack);
+        }
+        else {
+            this.id = guid();
+            this.mapObjectType = MapObjectType.item;
+            this.getItem(itemset, type);
 
-        this.passing = false;
+            this.passing = false;
+        }
+    }
+
+    createFromInventoryItem(itemset: HTMLImageElement, invItem: InventoryItem, stack?: number) {
+        this.id = guid();
+        this.mapObjectType = MapObjectType.item;
+
+        switch (invItem.type) {
+            case InventoryItemType.axe:
+                this.getItem(itemset, ItemType.axe);
+                break;
+            //case InventoryItemType.berries:
+            //    this.itemType = ItemType.berry;
+            //    break;
+            case InventoryItemType.bone:
+                this.getItem(itemset, ItemType.bone);
+                break;
+            //case InventoryItemType.brick:
+            //    this.itemType = ItemType.brick;
+            //    break;
+            //case InventoryItemType.canvas:
+            //    this.itemType = ItemType.axe;
+            //    break;
+            case InventoryItemType.clay:
+                this.getItem(itemset, ItemType.clay);
+                break;
+            case InventoryItemType.hammer:
+                this.getItem(itemset, ItemType.hammer);
+                break;
+            case InventoryItemType.hemp:
+                this.getItem(itemset, ItemType.hemp);
+                break;
+            case InventoryItemType.knife:
+                this.getItem(itemset, ItemType.knife);
+                break;
+            //case InventoryItemType.lumber:
+            //    this.itemType = ItemType.;
+            //    break;
+            //case InventoryItemType.meat:
+            //    this.itemType = ItemType.mea;
+            //    break;
+            case InventoryItemType.mushroom:
+                this.getItem(itemset, ItemType.mushroom);
+                break;
+            //case InventoryItemType.plank:
+            //    this.itemType = ItemType.axe;
+            //    break;
+            case InventoryItemType.rock:
+                this.getItem(itemset, ItemType.rocksA);
+                break;
+            case InventoryItemType.roots:
+                this.getItem(itemset, ItemType.roots);
+                break;
+            case InventoryItemType.rope:
+                this.getItem(itemset, ItemType.rope);
+                break;
+            //case InventoryItemType.sand:
+            //    this.itemType = ItemType.sa;
+            //    break;
+            //case InventoryItemType.skin:
+            //    this.itemType = ItemType.sk;
+            //    break;
+            case InventoryItemType.stick:
+                this.getItem(itemset, ItemType.stickA);
+                break;
+            //case InventoryItemType.twine:
+            //    this.itemType = ItemType.tw;
+            //    break;
+        }
+
+        this.stack = stack ? stack : invItem.stack;
+        this.canPickup = true;
     }
 
     getItem(itemset: HTMLImageElement, type: ItemType) {
         var canvas = <HTMLCanvasElement>$('<canvas>')[0],
             ctx = canvas.getContext('2d'),
-            coords = this.getItemImgCoords(type),
-            width = (coords.width * 50) * coords.multiplier,
-            height = (coords.height * 50) * coords.multiplier,
+            data = this.getItemData(type),
+            width = (data.width * 50) * data.multiplier,
+            height = (data.height * 50) * data.multiplier,
             splicedImg = new Image();
 
         canvas.width = width;
         canvas.height = height;
 
-        ctx.drawImage(itemset, coords.x * 32, coords.y * 32, coords.width * 32, coords.height * 32, 0, 0, width, height);
+        ctx.drawImage(itemset, data.x * 32, data.y * 32, data.width * 32, data.height * 32, 0, 0, width, height);
         splicedImg.src = canvas.toDataURL('image/png');
 
         this.img = splicedImg;
+        this.itemType = type;
         this.height = height;
         this.width = height;
-        this.z = coords.z;
-        this.pass = coords.pass;
-        this.passSlow = coords.passSlow;
+        this.z = data.z;
+        this.pass = data.pass;
+        this.passSlow = data.passSlow;
+        this.canPickup = data.canPickup;
+        this.stack = data.stack;
     }
 
-    getItemImgCoords(type: ItemType) {
-        var loc = {
+    getItemData(type: ItemType) {
+        var data = {
             x: 0,
             y: 0,
             z: 0,
@@ -107,166 +193,195 @@ class MapItem implements IMapObject {
             multiplier: 1,
             pass: false,
             passSlow: 1,
+            canPickup: false,
+            stack: 1
             //passYOffset: 
         };
 
         switch (type) {
             case ItemType.axe:
-                loc.x = 2;
-                loc.y = 0;
+                data.x = 2;
+                data.y = 0;
+                data.canPickup = true;
                 break;
             case ItemType.berry:
-                loc.x = 11;
-                loc.y = 0;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 11;
+                data.y = 0;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case ItemType.bone:
-                loc.x = 8;
-                loc.y = 5;
+                data.x = 8;
+                data.y = 5;
+                data.canPickup = true;
                 break;
             case ItemType.bush:
-                loc.x = 10;
-                loc.y = 0;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 10;
+                data.y = 0;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case ItemType.clay:
-                loc.x = 5;
-                loc.y = 5;
-                loc.z = 1;
+                data.x = 5;
+                data.y = 5;
+                data.z = 1;
+                data.canPickup = true;
                 break;
             case ItemType.fern:
-                loc.x = 1;
-                loc.y = 5;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 1;
+                data.y = 5;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case ItemType.flowerA:
-                loc.x = 0;
-                loc.y = 5;
+                data.x = 0;
+                data.y = 5;
+                data.canPickup = true;
                 break;
             case ItemType.flowerB:
-                loc.x = 0;
-                loc.y = 6;
+                data.x = 0;
+                data.y = 6;
+                data.canPickup = true;
                 break;
             case ItemType.grassA:
-                loc.x = 4;
-                loc.y = 6;
+                data.x = 4;
+                data.y = 6;
                 break;
             case ItemType.grassB:
-                loc.x = 4;
-                loc.y = 7;
+                data.x = 4;
+                data.y = 7;
                 break;
             case ItemType.grassC:
-                loc.x = 5;
-                loc.y = 7;
+                data.x = 5;
+                data.y = 7;
                 break;
             case ItemType.grassD:
-                loc.x = 5;
-                loc.y = 6;
+                data.x = 5;
+                data.y = 6;
                 break;
             case ItemType.hammer:
-                loc.x = 0;
-                loc.y = 0;
+                data.x = 0;
+                data.y = 0;
                 break;
             case ItemType.hemp:
-                loc.x = 9;
-                loc.y = 1;
-                loc.z = 1;
+                data.x = 9;
+                data.y = 1;
+                data.z = 1;
+                data.canPickup = true;
                 break;
             case ItemType.knife:
-                loc.x = 1;
-                loc.y = 0;
+                data.x = 1;
+                data.y = 0;
+                data.canPickup = true;
                 break;
             case ItemType.log:
-                loc.x = 7;
-                loc.y = 5;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 7;
+                data.y = 5;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case ItemType.mushroom:
-                loc.x = 4;
-                loc.y = 5;
+                data.x = 4;
+                data.y = 5;
+                data.canPickup = true;
                 break;
             case ItemType.plant:
-                loc.x = 1;
-                loc.y = 8;
+                data.x = 8;
+                data.y = 1;
+                data.multiplier = 2;
                 break;
             case ItemType.rockA:
-                loc.x = 8;
-                loc.y = 3;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 8;
+                data.y = 3;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case ItemType.rockB:
-                loc.x = 9;
-                loc.y = 3;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 9;
+                data.y = 3;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case ItemType.rockC:
-                loc.x = 10;
-                loc.y = 3;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 10;
+                data.y = 3;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case ItemType.rockD:
-                loc.x = 1;
-                loc.y = 7;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 1;
+                data.y = 7;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case ItemType.rockE:
-                loc.x = 3;
-                loc.y = 7;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 3;
+                data.y = 7;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case ItemType.rocksA:
-                loc.x = 0;
-                loc.y = 7;
+                data.x = 0;
+                data.y = 7;
+                data.canPickup = true;
+                data.stack = 3;
                 break;
             case ItemType.rocksB:
-                loc.x = 2;
-                loc.y = 7;
+                data.x = 2;
+                data.y = 7;
+                data.canPickup = true;
+                data.stack = 3;
                 break;
             case ItemType.roots:
-                loc.x = 0;
-                loc.y = 6;
+                data.x = 1;
+                data.y = 6;
+                data.canPickup = true;
                 break;
             case ItemType.rope:
-                loc.x = 5;
-                loc.y = 0;
+                data.x = 5;
+                data.y = 0;
+                data.canPickup = true;
                 break;
             case ItemType.stickA:
-                loc.x = 6;
-                loc.y = 0;
+                data.x = 6;
+                data.y = 0;
+                data.canPickup = true;
                 break;
             case ItemType.stickB:
-                loc.x = 7;
-                loc.y = 0;
+                data.x = 7;
+                data.y = 0;
+                data.canPickup = true;
                 break;
             case ItemType.tree:
-                loc.x = 6;
-                loc.y = 6;
-                loc.z = 1;
-                loc.height = 2;
-                loc.width = 2;
-                loc.pass = true;
-                loc.passSlow = .5;
+                data.x = 6;
+                data.y = 6;
+                data.z = 1;
+                data.height = 2;
+                data.width = 2;
+                data.pass = true;
+                data.passSlow = .5;
                 break;
         }
-        return loc;
+        return data;
     }
 
     onItem(y: number, x: number) {
-        return (y >= this.y && y <= this.y + this.height) && (x >= this.x && x <= this.x + this.width);
+        var startY = this.y - (this.height / 2),
+            endY = startY + this.height,
+            startX = this.x - (this.width / 2),
+            endX = startX + this.width;
+
+        return (y >= startY && y <= endY) && (x >= startX && x <= endX);
+    }
+
+    toInventoryItem() {
+        var item = new InventoryItem(this);
+        return item;
     }
 
     draw(ctx: CanvasRenderingContext2D, view: ViewPort) {
-        var offsetX = this.x - view.startX,
-            offsetY = this.y - view.startY;
+        var offsetX = (this.x - view.startX) - (this.width / 2),
+            offsetY = (this.y - view.startY) - (this.height / 2);
 
         ctx.drawImage(this.img, 0, 0, this.width, this.height, offsetX, offsetY, this.width, this.height);
     }

@@ -1,43 +1,96 @@
 var Player = (function () {
-    function Player() {
-        this.inventory = new Inventory(10);
+    function Player(itemset) {
+        this.inventory = new Inventory(5, itemset);
     }
-    Player.prototype.update = function (world, sound) {
+    Player.prototype.update = function (game, world, sound) {
         // player can perform action
-        if (_.some(this.controls.actions, function (a) {
-            return a.button === 3 && !a.recorded;
-        })) {
-            // player pressed 'y', toggle inventory
-            this.inventory.toggle();
-        }
-        else if (this.inventory.focusedIndex != null) {
-            // inventory is open
-            if (_.some(this.controls.actions, function (a) {
-                return a.button === 14 && !a.recorded;
-            })) {
-                // left on d-pad
-                if (this.inventory.focusedIndex == 0) {
-                    this.inventory.focusedIndex = this.inventory.carryCapacity - 1;
+        this.processActions(game, world);
+        this.sprite.move(this.controls, world, sound);
+    };
+    Player.prototype.processActions = function (game, world) {
+        for (var a in this.controls.actions) {
+            var action = this.controls.actions[a];
+            if (!action.recorded) {
+                switch (action.button) {
+                    case 0:
+                        if (this.inventory.active) {
+                            this.inventory.focusedIndex;
+                        }
+                        else {
+                            world.interactMapObject(this, game);
+                        }
+                        break;
+                    case 1:
+                        if (this.inventory.active) {
+                            // drop stack
+                            var dropped = this.inventory.dropInv(this.inventory.focusedIndex, true);
+                            if (dropped) {
+                                world.dropMapItem(dropped, this.sprite, game);
+                            }
+                        }
+                        break;
+                    case 2:
+                        if (this.inventory.active) {
+                            var dropped = this.inventory.dropInv(this.inventory.focusedIndex, false);
+                            if (dropped) {
+                                world.dropMapItem(dropped, this.sprite, game);
+                            }
+                        }
+                        else {
+                        }
+                        break;
+                    case 3:
+                        this.inventory.toggle();
+                        break;
+                    case 4:
+                        break;
+                    case 5:
+                        break;
+                    case 6:
+                        break;
+                    case 7:
+                        break;
+                    case 8:
+                        break;
+                    case 9:
+                        break;
+                    case 10:
+                        break;
+                    case 11:
+                        break;
+                    case 12:
+                        if (this.inventory.active) {
+                            this.inventory.focusedHolding = true;
+                        }
+                        break;
+                    case 13:
+                        if (this.inventory.active) {
+                            this.inventory.focusedHolding = false;
+                        }
+                        break;
+                    case 14:
+                        if (this.inventory.active) {
+                            if (this.inventory.focusedIndex == 0) {
+                                this.inventory.focusedIndex = this.inventory.carryCapacity - 1;
+                            }
+                            else {
+                                this.inventory.focusedIndex--;
+                            }
+                        }
+                        break;
+                    case 15:
+                        if (this.inventory.active) {
+                            if (this.inventory.focusedIndex == this.inventory.carryCapacity - 1) {
+                                this.inventory.focusedIndex = 0;
+                            }
+                            else {
+                                this.inventory.focusedIndex++;
+                            }
+                        }
+                        break;
                 }
-                else {
-                    this.inventory.focusedIndex--;
-                }
+                action.recorded = true;
             }
-            else if (_.some(this.controls.actions, function (a) {
-                return a.button === 15 && !a.recorded;
-            })) {
-                // right on d-pad
-                if (this.inventory.focusedIndex == this.inventory.carryCapacity - 1) {
-                    this.inventory.focusedIndex = 0;
-                }
-                else {
-                    this.inventory.focusedIndex++;
-                }
-            }
-        }
-        else {
-            // no inventory actions, attempt movement
-            this.sprite.move(this.controls.x, this.controls.y, this.controls.strength, world, sound);
         }
     };
     return Player;

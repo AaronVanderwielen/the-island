@@ -51,10 +51,10 @@ class Game {
             var tileset = <HTMLImageElement>this.getAssetById('terrain').value,
                 itemset = <HTMLImageElement>this.getAssetById('items').value;
 
-            this.world = new World(100, 100, 100, 5, tileset, itemset, this.objects);
+            this.world = new World(200, 200, 100, 5, tileset, itemset, this.objects);
             this.sound = new Sound();
 
-            this.player = new Player();
+            this.player = new Player(itemset);
             this.player.controls = new Controls(this.fps);
             this.player.sprite = new Sprite(this.getAssetById('char'));
             this.player.sprite.x = 2000;
@@ -107,7 +107,7 @@ class Game {
     }
 
     stateUpdate() {
-        this.player.update(this.world, this.sound);
+        this.player.update(this, this.world, this.sound);
     }
 
     refresh() {
@@ -121,7 +121,7 @@ class Game {
         this.objects = _.sortBy(this.objects, function (o) {
             var sortBy = o.z.toString();
 
-            if (o.type == MapObjectType.sprite) sortBy += (o.passing ? "0" : "2");
+            if (o.mapObjectType == MapObjectType.sprite) sortBy += (o.passing ? "0" : "2");
             else sortBy += "1";
 
             return sortBy;
@@ -180,3 +180,13 @@ $(function () {
         game.init();
     }
 });
+
+function guid() {
+    function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+        s4() + '-' + s4() + s4() + s4();
+}

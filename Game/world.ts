@@ -150,7 +150,7 @@ class World {
         // add grass patches to dirt randomly
         this.createGrass(.03, 5);
 
-        this.createRiversAndLakes(.05, .01);
+        this.createRiversAndLakes(.005, .002);
     }
 
     createOcean() {
@@ -264,11 +264,11 @@ class World {
                 if (block.type == TerrainType.grass && !block.borders([TerrainType.shallow])) {
                     // roll for lake
                     var roll = Math.random();
-                    if (roll < .001) {
-                        console.log("creating lake at " + nextBlock.y + ',' + nextBlock.x);
+                    if (roll < lakeChance) {
+                        console.log("creating lake at " + block.y + ',' + block.x);
 
-                        this.randShape(nextBlock.x, nextBlock.y, Math.ceil(Math.random() * (this.gradientSize)), 1, TerrainType.ocean, [TerrainType.shallow, TerrainType.beach, TerrainType.dirt, TerrainType.grass, TerrainType.rock]);
-                        this.randShape(nextBlock.x, nextBlock.y, Math.ceil(this.gradientSize + (Math.random() * this.gradientSize)), 1, TerrainType.shallow, [TerrainType.beach, TerrainType.dirt, TerrainType.grass, TerrainType.rock]);
+                        this.randShape(block.x, block.y, Math.ceil(Math.random() * (this.gradientSize)), 1, TerrainType.ocean, [TerrainType.shallow, TerrainType.beach, TerrainType.dirt, TerrainType.grass, TerrainType.rock]);
+                        this.randShape(block.x, block.y, Math.ceil(this.gradientSize + (Math.random() * this.gradientSize)), 1, TerrainType.shallow, [TerrainType.beach, TerrainType.dirt, TerrainType.grass, TerrainType.rock]);
                     }
                 }
             }
@@ -287,8 +287,8 @@ class World {
                 var type = chanceTypes[c].types[Math.round(Math.random() * (chanceTypes[c].types.length - 1))],
                     item = new MapItem(this.itemset, type);
 
-                item.x = item.width >= (this.tileSize/2) ? block.x * this.tileSize : block.x * this.tileSize + (this.tileSize / 2);
-                item.y = item.height >= (this.tileSize / 2) ? block.y * this.tileSize : block.y * this.tileSize + (this.tileSize / 2);
+                item.x = item.width >= (this.tileSize / 2) ? block.x * this.tileSize + (this.tileSize / 2) : block.x * this.tileSize + (this.tileSize / 2);
+                item.y = item.height >= (this.tileSize / 2) ? block.y * this.tileSize + (this.tileSize / 2) : block.y * this.tileSize + (this.tileSize / 2);
                 item.on = block;
                 item.sectionId = block.sectionId;
 
@@ -297,6 +297,77 @@ class World {
             }
             prev += chanceTypes[c].c;
         }
+    }
+
+    distance(x1: number, x2: number, y1: number, y2: number) {
+        return Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
+    }
+
+    interactMapObject(player: Player, game: Game) {
+        var item = this.pickupMapItem(player.sprite, game);
+        if (item) {
+            var numPicked = player.inventory.pickup(item),
+                numLeft = item.stack - numPicked;
+
+            if (numLeft > 0) {
+                item.stack = numLeft;
+                this.dropMapItem(item, player.sprite, game);
+            }
+        }
+    }
+
+    pickupMapItem(sprite: Sprite, game: Game) {
+        // get space in front of player
+        var range = (this.tileSize / 4),
+            x = sprite.x + (sprite.currAnim === 1 ? range : sprite.currAnim === 3 ? -range : 0),
+            y = sprite.y + (sprite.currAnim === 2 ? range : sprite.currAnim === 0 ? -range : 0);
+
+        var blocks = this.getSurroundingBlocks(sprite.x, sprite.y),
+            objects = this.getBlocksObjects(blocks),
+            world = this;
+
+        objects = _.filter(objects, function (o: IMapObject) { return o.mapObjectType == MapObjectType.item && o.canPickup; });
+
+        if (objects.length > 0) {
+            objects = _.sortBy(objects, function (o) { return world.distance(x, o.x, y, o.y); });
+
+            if (objects[0]) {
+                var dist = this.distance(x, objects[0].x, y, objects[0].y);
+                console.log(dist);
+                if (dist < range) {
+                    var invItem = objects[0];
+                    if (invItem) {
+                        // remove from map
+                        objects[0].on.objects = _.reject(objects[0].on.objects, function (o) {
+                            return o.id === objects[0].id;
+                        });
+                        game.objects = _.reject(game.objects, function (o) {
+                            return o.id === objects[0].id;
+                        });
+
+                        return <MapItem>invItem;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    dropMapItem(item: MapItem, sprite: Sprite, game: Game) {
+        // get space in front of player
+        var range = (this.tileSize / 4),
+            x = sprite.x + (sprite.currAnim === 1 ? range : sprite.currAnim === 3 ? -range : 0),
+            y = sprite.y + (sprite.currAnim === 2 ? range : sprite.currAnim === 0 ? -range : 0);
+
+        var block = this.getBlock(x, y);
+        item.x = x;
+        item.y = y;
+        item.on = block;
+        item.sectionId = block.sectionId;
+
+        block.objects.push(item);
+        game.objects.push(item);
     }
 
     randShape(cx: number, cy: number, d: number, smooth: number, type: TerrainType, overwrite?: Array<TerrainType>) {
@@ -537,6 +608,37 @@ class World {
             xIndex = Math.floor(x / this.tileSize);
 
         return this.grid[yIndex][xIndex];
+    }
+
+    getSurroundingBlocks(x: number, y: number) {
+        var blocks = [],
+            block = this.getBlock(x, y);
+
+        blocks.push(block.upperLeft);
+        blocks.push(block.above);
+        blocks.push(block.upperRight);
+        blocks.push(block.left);
+        blocks.push(block);
+        blocks.push(block.right);
+        blocks.push(block.lowerLeft);
+        blocks.push(block.below);
+        blocks.push(block.lowerRight);
+
+        return blocks;
+    }
+
+    getBlocksObjects(blocks: Array<Block>) {
+        var objects: Array<IMapObject> = [];
+
+        for (var b in blocks) {
+            if (blocks[b]) {
+                for (var o in blocks[b].objects) {
+                    objects.push(blocks[b].objects[o]);
+                }
+            }
+        }
+
+        return objects;
     }
 
     getSectionId(x: number, y: number, measurement: string) {

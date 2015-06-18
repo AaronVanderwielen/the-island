@@ -1,5 +1,6 @@
 ﻿class Sprite implements IMapObject {
-    type: MapObjectType;
+    id: string;
+    mapObjectType: MapObjectType;
     img: HTMLImageElement;
     set: Array<Array<HTMLImageElement>>;
     x: number;
@@ -19,11 +20,13 @@
     pass: boolean;
     passSlow: number;
     passing: boolean;
+    canPickup: boolean;
 
     constructor(asset: Asset) {
         var sprite = this;
 
-        sprite.type = MapObjectType.sprite;
+        sprite.id = guid();
+        sprite.mapObjectType = MapObjectType.sprite;
 
         sprite.height = 96;
         sprite.width = 72;
@@ -42,6 +45,7 @@
         sprite.pass = false;
         sprite.passSlow = 0;
         sprite.passing = false;
+        sprite.canPickup = false;
 
         sprite.importSet(asset.value, function (set) {
             sprite.set = set;
@@ -80,15 +84,16 @@
         return (y >= this.y && y <= this.y + this.height) && (x >= this.x && x <= this.x + this.width);
     }
 
-    move(x: number, y: number, strength: number, world: World, sound: Sound) {
-
+    move(controls: Controls, world: World, sound: Sound) {
         var note = [50, .1, .4, 'triangle'];
 
-        var d = Math.ceil((strength * 2) * this.slow),
-            nextY = Math.round(this.y + (y * d)),
-            nextX = Math.round(this.x + (x * d)),
+        var d = Math.ceil(((controls.sprinting && !controls.looking ? controls.strength * 2 : controls.strength) * 2) * this.slow),
+            nextY = Math.round(this.y + (controls.y * d)),
+            nextX = Math.round(this.x + (controls.x * d)),
             yOffset = Math.round(-(this.height * (1 - this.yAdjust))),
             nextBlock = world.getBlock(nextX, nextY + yOffset),
+            nearbyBlocks = world.getSurroundingBlocks(nextX, nextY + yOffset),
+            nearbyObjects = world.getBlocksObjects(nearbyBlocks),
             canMove = true;
 
         if (nextBlock.type === TerrainType.shallow) {
@@ -110,12 +115,12 @@
 
 
         if (canMove) {
-            if (nextBlock.objects.length > 0) {
+            if (nearbyObjects.length > 0) {
                 this.passing = false;
-                for (var o in nextBlock.objects) {
-                    if (nextBlock.objects[o].z === this.z && nextBlock.objects[o].onItem(nextY, nextX)) {
-                        if (nextBlock.objects[o].pass) {
-                            this.slow = nextBlock.objects[o].passSlow;
+                for (var o in nearbyObjects) {
+                    if (nearbyObjects[o].z === this.z && nearbyObjects[o].onItem(nextY, nextX)) {
+                        if (nearbyObjects[o].pass) {
+                            this.slow = nearbyObjects[o].passSlow;
                             this.passing = true;
                         }
                         else {
@@ -133,17 +138,21 @@
         var info2 = document.getElementById('tile');
         info2.innerHTML = nextBlock.type.toString();
 
-        if (strength > 0) {
-            if (!canMove || d == 0) {
-                this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
-            }
-            else {
-                if (this.stepCounter >= 40) this.stepDir = -strength;
-                else if (this.stepCounter <= 0) this.stepDir = strength;
+        if (controls.looking) {
+            this.currAnim = (Math.abs(controls.lookx) > Math.abs(controls.looky)) ? (controls.lookx > 0 ? 1 : 3) : (controls.looky > 0 ? 2 : 0);
+        }
+        else {
+            this.currAnim = (Math.abs(controls.x) > Math.abs(controls.y)) ? (controls.x > 0 ? 1 : 3) : (controls.y > 0 ? 2 : 0);
+        }
+
+        if (controls.strength > 0) {
+            if (canMove && d !== 0) {
+                if (this.stepCounter >= 40) this.stepDir = -controls.strength;
+                else if (this.stepCounter <= 0) this.stepDir = controls.strength;
 
                 this.stepCounter += this.stepDir;
 
-                this.currAnim = (Math.abs(x) > Math.abs(y)) ? (x > 0 ? 1 : 3) : (y > 0 ? 2 : 0);
+                //this.currAnim = (Math.abs(controls.x) > Math.abs(controls.y)) ? (controls.x > 0 ? 1 : 3) : (controls.y > 0 ? 2 : 0);
                 this.currStep = this.stepCounter < 10 ? 0 : this.stepCounter > 30 ? 2 : 1;
 
                 if (this.stepCounter === 40 || this.stepCounter === 0) {
@@ -159,7 +168,8 @@
         var info = document.getElementById('pos');
         info.innerHTML = "";
         info.innerHTML += 'x: ' + this.x + '<br />';
-        info.innerHTML += 'y: ' + this.y;
+        info.innerHTML += 'y: ' + this.y + '<br />';
+        info.innerHTML += 'anim: ' + this.currAnim;
     }
 
     draw(ctx: CanvasRenderingContext2D, view: ViewPort) {

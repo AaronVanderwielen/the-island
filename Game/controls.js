@@ -3,6 +3,8 @@ var Controls = (function () {
         this.fps = fps;
         this.x = 0;
         this.y = 0;
+        this.lookx = 0;
+        this.looky = 0;
         this.strength = 0;
         this.actions = [];
     }
@@ -18,22 +20,17 @@ var Controls = (function () {
                     // new action
                     this.actions.push({
                         button: i,
-                        recorded: false,
-                        fade: 0
+                        recorded: false
                     });
                 }
             }
             else {
                 // no longer holding button
                 if (existingAction) {
-                    // iterate time spent not holding
-                    existingAction.fade++;
-                    if (existingAction.fade > this.fps) {
-                        // remove from actions
-                        this.actions = _.reject(this.actions, function (a) {
-                            return a.button === i;
-                        });
-                    }
+                    // remove from actions
+                    this.actions = _.reject(this.actions, function (a) {
+                        return a.button === i;
+                    });
                 }
             }
         }
@@ -41,11 +38,17 @@ var Controls = (function () {
             var x = gp.axes[0], y = gp.axes[1], c = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)), strength = c < .2 ? 0 : (c < .8 ? 1 : 2);
             this.x = x;
             this.y = y;
-            this.strength = gp.buttons[7].pressed ? strength * 2 : strength;
+            this.strength = strength;
         }
         else {
             this.strength = 0;
         }
+        if (Math.abs(gp.axes[3]) > 0.1 || Math.abs(gp.axes[2]) > 0.1) {
+            this.lookx = gp.axes[2];
+            this.looky = gp.axes[3];
+        }
+        this.looking = gp.buttons[6].pressed;
+        this.sprinting = gp.buttons[7].pressed;
     };
     Controls.prototype.start = function () {
         var obj = this, hasGP = false, repGP;

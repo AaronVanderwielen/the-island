@@ -37,26 +37,76 @@ var ItemType;
     ItemType[ItemType["rope"] = 29] = "rope";
 })(ItemType || (ItemType = {}));
 var MapItem = (function () {
-    function MapItem(itemset, type) {
-        this.type = 0 /* item */;
-        this.getItem(itemset, type);
-        this.passing = false;
+    function MapItem(itemset, type, droppedItem, stack) {
+        if (droppedItem) {
+            this.createFromInventoryItem(itemset, droppedItem, stack);
+        }
+        else {
+            this.id = guid();
+            this.mapObjectType = 0 /* item */;
+            this.getItem(itemset, type);
+            this.passing = false;
+        }
     }
+    MapItem.prototype.createFromInventoryItem = function (itemset, invItem, stack) {
+        this.id = guid();
+        this.mapObjectType = 0 /* item */;
+        switch (invItem.type) {
+            case 19 /* axe */:
+                this.getItem(itemset, 28 /* axe */);
+                break;
+            case 3 /* bone */:
+                this.getItem(itemset, 19 /* bone */);
+                break;
+            case 4 /* clay */:
+                this.getItem(itemset, 24 /* clay */);
+                break;
+            case 18 /* hammer */:
+                this.getItem(itemset, 26 /* hammer */);
+                break;
+            case 2 /* hemp */:
+                this.getItem(itemset, 23 /* hemp */);
+                break;
+            case 17 /* knife */:
+                this.getItem(itemset, 27 /* knife */);
+                break;
+            case 6 /* mushroom */:
+                this.getItem(itemset, 6 /* mushroom */);
+                break;
+            case 1 /* rock */:
+                this.getItem(itemset, 17 /* rocksA */);
+                break;
+            case 7 /* roots */:
+                this.getItem(itemset, 25 /* roots */);
+                break;
+            case 11 /* rope */:
+                this.getItem(itemset, 29 /* rope */);
+                break;
+            case 0 /* stick */:
+                this.getItem(itemset, 21 /* stickA */);
+                break;
+        }
+        this.stack = stack ? stack : invItem.stack;
+        this.canPickup = true;
+    };
     MapItem.prototype.getItem = function (itemset, type) {
-        var canvas = $('<canvas>')[0], ctx = canvas.getContext('2d'), coords = this.getItemImgCoords(type), width = (coords.width * 50) * coords.multiplier, height = (coords.height * 50) * coords.multiplier, splicedImg = new Image();
+        var canvas = $('<canvas>')[0], ctx = canvas.getContext('2d'), data = this.getItemData(type), width = (data.width * 50) * data.multiplier, height = (data.height * 50) * data.multiplier, splicedImg = new Image();
         canvas.width = width;
         canvas.height = height;
-        ctx.drawImage(itemset, coords.x * 32, coords.y * 32, coords.width * 32, coords.height * 32, 0, 0, width, height);
+        ctx.drawImage(itemset, data.x * 32, data.y * 32, data.width * 32, data.height * 32, 0, 0, width, height);
         splicedImg.src = canvas.toDataURL('image/png');
         this.img = splicedImg;
+        this.itemType = type;
         this.height = height;
         this.width = height;
-        this.z = coords.z;
-        this.pass = coords.pass;
-        this.passSlow = coords.passSlow;
+        this.z = data.z;
+        this.pass = data.pass;
+        this.passSlow = data.passSlow;
+        this.canPickup = data.canPickup;
+        this.stack = data.stack;
     };
-    MapItem.prototype.getItemImgCoords = function (type) {
-        var loc = {
+    MapItem.prototype.getItemData = function (type) {
+        var data = {
             x: 0,
             y: 0,
             z: 0,
@@ -65,161 +115,185 @@ var MapItem = (function () {
             multiplier: 1,
             pass: false,
             passSlow: 1,
+            canPickup: false,
+            stack: 1
         };
         switch (type) {
             case 28 /* axe */:
-                loc.x = 2;
-                loc.y = 0;
+                data.x = 2;
+                data.y = 0;
+                data.canPickup = true;
                 break;
             case 1 /* berry */:
-                loc.x = 11;
-                loc.y = 0;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 11;
+                data.y = 0;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case 19 /* bone */:
-                loc.x = 8;
-                loc.y = 5;
+                data.x = 8;
+                data.y = 5;
+                data.canPickup = true;
                 break;
             case 2 /* bush */:
-                loc.x = 10;
-                loc.y = 0;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 10;
+                data.y = 0;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case 24 /* clay */:
-                loc.x = 5;
-                loc.y = 5;
-                loc.z = 1;
+                data.x = 5;
+                data.y = 5;
+                data.z = 1;
+                data.canPickup = true;
                 break;
             case 3 /* fern */:
-                loc.x = 1;
-                loc.y = 5;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 1;
+                data.y = 5;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case 4 /* flowerA */:
-                loc.x = 0;
-                loc.y = 5;
+                data.x = 0;
+                data.y = 5;
+                data.canPickup = true;
                 break;
             case 5 /* flowerB */:
-                loc.x = 0;
-                loc.y = 6;
+                data.x = 0;
+                data.y = 6;
+                data.canPickup = true;
                 break;
             case 7 /* grassA */:
-                loc.x = 4;
-                loc.y = 6;
+                data.x = 4;
+                data.y = 6;
                 break;
             case 8 /* grassB */:
-                loc.x = 4;
-                loc.y = 7;
+                data.x = 4;
+                data.y = 7;
                 break;
             case 9 /* grassC */:
-                loc.x = 5;
-                loc.y = 7;
+                data.x = 5;
+                data.y = 7;
                 break;
             case 10 /* grassD */:
-                loc.x = 5;
-                loc.y = 6;
+                data.x = 5;
+                data.y = 6;
                 break;
             case 26 /* hammer */:
-                loc.x = 0;
-                loc.y = 0;
+                data.x = 0;
+                data.y = 0;
                 break;
             case 23 /* hemp */:
-                loc.x = 9;
-                loc.y = 1;
-                loc.z = 1;
+                data.x = 9;
+                data.y = 1;
+                data.z = 1;
+                data.canPickup = true;
                 break;
             case 27 /* knife */:
-                loc.x = 1;
-                loc.y = 0;
+                data.x = 1;
+                data.y = 0;
+                data.canPickup = true;
                 break;
             case 20 /* log */:
-                loc.x = 7;
-                loc.y = 5;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 7;
+                data.y = 5;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case 6 /* mushroom */:
-                loc.x = 4;
-                loc.y = 5;
+                data.x = 4;
+                data.y = 5;
+                data.canPickup = true;
                 break;
             case 11 /* plant */:
-                loc.x = 1;
-                loc.y = 8;
+                data.x = 8;
+                data.y = 1;
+                data.multiplier = 2;
                 break;
             case 12 /* rockA */:
-                loc.x = 8;
-                loc.y = 3;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 8;
+                data.y = 3;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case 13 /* rockB */:
-                loc.x = 9;
-                loc.y = 3;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 9;
+                data.y = 3;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case 14 /* rockC */:
-                loc.x = 10;
-                loc.y = 3;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 10;
+                data.y = 3;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case 15 /* rockD */:
-                loc.x = 1;
-                loc.y = 7;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 1;
+                data.y = 7;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case 16 /* rockE */:
-                loc.x = 3;
-                loc.y = 7;
-                loc.z = 1;
-                loc.multiplier = 2;
+                data.x = 3;
+                data.y = 7;
+                data.z = 1;
+                data.multiplier = 2;
                 break;
             case 17 /* rocksA */:
-                loc.x = 0;
-                loc.y = 7;
+                data.x = 0;
+                data.y = 7;
+                data.canPickup = true;
+                data.stack = 3;
                 break;
             case 18 /* rocksB */:
-                loc.x = 2;
-                loc.y = 7;
+                data.x = 2;
+                data.y = 7;
+                data.canPickup = true;
+                data.stack = 3;
                 break;
             case 25 /* roots */:
-                loc.x = 0;
-                loc.y = 6;
+                data.x = 1;
+                data.y = 6;
+                data.canPickup = true;
                 break;
             case 29 /* rope */:
-                loc.x = 5;
-                loc.y = 0;
+                data.x = 5;
+                data.y = 0;
+                data.canPickup = true;
                 break;
             case 21 /* stickA */:
-                loc.x = 6;
-                loc.y = 0;
+                data.x = 6;
+                data.y = 0;
+                data.canPickup = true;
                 break;
             case 22 /* stickB */:
-                loc.x = 7;
-                loc.y = 0;
+                data.x = 7;
+                data.y = 0;
+                data.canPickup = true;
                 break;
             case 0 /* tree */:
-                loc.x = 6;
-                loc.y = 6;
-                loc.z = 1;
-                loc.height = 2;
-                loc.width = 2;
-                loc.pass = true;
-                loc.passSlow = .5;
+                data.x = 6;
+                data.y = 6;
+                data.z = 1;
+                data.height = 2;
+                data.width = 2;
+                data.pass = true;
+                data.passSlow = .5;
                 break;
         }
-        return loc;
+        return data;
     };
     MapItem.prototype.onItem = function (y, x) {
-        return (y >= this.y && y <= this.y + this.height) && (x >= this.x && x <= this.x + this.width);
+        var startY = this.y - (this.height / 2), endY = startY + this.height, startX = this.x - (this.width / 2), endX = startX + this.width;
+        return (y >= startY && y <= endY) && (x >= startX && x <= endX);
+    };
+    MapItem.prototype.toInventoryItem = function () {
+        var item = new InventoryItem(this);
+        return item;
     };
     MapItem.prototype.draw = function (ctx, view) {
-        var offsetX = this.x - view.startX, offsetY = this.y - view.startY;
+        var offsetX = (this.x - view.startX) - (this.width / 2), offsetY = (this.y - view.startY) - (this.height / 2);
         ctx.drawImage(this.img, 0, 0, this.width, this.height, offsetX, offsetY, this.width, this.height);
     };
     return MapItem;

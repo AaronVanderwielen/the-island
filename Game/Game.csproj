@@ -32,6 +32,7 @@
     <TypeScriptCompile Include="game.ts" />
     <TypeScriptCompile Include="controls.ts" />
     <TypeScriptCompile Include="inventory.ts" />
+    <TypeScriptCompile Include="inventoryItem.ts" />
     <TypeScriptCompile Include="mapItem.ts" />
     <TypeScriptCompile Include="player.ts" />
     <TypeScriptCompile Include="util\createjs\createjs-lib.d.ts" />

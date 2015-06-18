@@ -85,7 +85,7 @@ var World = (function () {
         this.fill(this.gradientSize * 4, this.numX - (this.gradientSize * 4), this.gradientSize * 4, this.numY - (this.gradientSize * 4), 3 /* dirt */, false);
         // add grass patches to dirt randomly
         this.createGrass(.03, 5);
-        this.createRiversAndLakes(.05, .01);
+        this.createRiversAndLakes(.005, .002);
     };
     World.prototype.createOcean = function () {
         // create deep water
@@ -186,10 +186,10 @@ var World = (function () {
                 if (block.type == 4 /* grass */ && !block.borders([1 /* shallow */])) {
                     // roll for lake
                     var roll = Math.random();
-                    if (roll < .001) {
-                        console.log("creating lake at " + nextBlock.y + ',' + nextBlock.x);
-                        this.randShape(nextBlock.x, nextBlock.y, Math.ceil(Math.random() * (this.gradientSize)), 1, 0 /* ocean */, [1 /* shallow */, 2 /* beach */, 3 /* dirt */, 4 /* grass */, 5 /* rock */]);
-                        this.randShape(nextBlock.x, nextBlock.y, Math.ceil(this.gradientSize + (Math.random() * this.gradientSize)), 1, 1 /* shallow */, [2 /* beach */, 3 /* dirt */, 4 /* grass */, 5 /* rock */]);
+                    if (roll < lakeChance) {
+                        console.log("creating lake at " + block.y + ',' + block.x);
+                        this.randShape(block.x, block.y, Math.ceil(Math.random() * (this.gradientSize)), 1, 0 /* ocean */, [1 /* shallow */, 2 /* beach */, 3 /* dirt */, 4 /* grass */, 5 /* rock */]);
+                        this.randShape(block.x, block.y, Math.ceil(this.gradientSize + (Math.random() * this.gradientSize)), 1, 1 /* shallow */, [2 /* beach */, 3 /* dirt */, 4 /* grass */, 5 /* rock */]);
                     }
                 }
             }
@@ -202,8 +202,8 @@ var World = (function () {
             if (rand >= prev && rand <= prev + chanceTypes[c].c) {
                 // now pick random item
                 var type = chanceTypes[c].types[Math.round(Math.random() * (chanceTypes[c].types.length - 1))], item = new MapItem(this.itemset, type);
-                item.x = item.width >= (this.tileSize / 2) ? block.x * this.tileSize : block.x * this.tileSize + (this.tileSize / 2);
-                item.y = item.height >= (this.tileSize / 2) ? block.y * this.tileSize : block.y * this.tileSize + (this.tileSize / 2);
+                item.x = item.width >= (this.tileSize / 2) ? block.x * this.tileSize + (this.tileSize / 2) : block.x * this.tileSize + (this.tileSize / 2);
+                item.y = item.height >= (this.tileSize / 2) ? block.y * this.tileSize + (this.tileSize / 2) : block.y * this.tileSize + (this.tileSize / 2);
                 item.on = block;
                 item.sectionId = block.sectionId;
                 objects.push(item);
@@ -211,6 +211,61 @@ var World = (function () {
             }
             prev += chanceTypes[c].c;
         }
+    };
+    World.prototype.distance = function (x1, x2, y1, y2) {
+        return Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
+    };
+    World.prototype.interactMapObject = function (player, game) {
+        var item = this.pickupMapItem(player.sprite, game);
+        if (item) {
+            var numPicked = player.inventory.pickup(item), numLeft = item.stack - numPicked;
+            if (numLeft > 0) {
+                item.stack = numLeft;
+                this.dropMapItem(item, player.sprite, game);
+            }
+        }
+    };
+    World.prototype.pickupMapItem = function (sprite, game) {
+        // get space in front of player
+        var range = (this.tileSize / 4), x = sprite.x + (sprite.currAnim === 1 ? range : sprite.currAnim === 3 ? -range : 0), y = sprite.y + (sprite.currAnim === 2 ? range : sprite.currAnim === 0 ? -range : 0);
+        var blocks = this.getSurroundingBlocks(sprite.x, sprite.y), objects = this.getBlocksObjects(blocks), world = this;
+        objects = _.filter(objects, function (o) {
+            return o.mapObjectType == 0 /* item */ && o.canPickup;
+        });
+        if (objects.length > 0) {
+            objects = _.sortBy(objects, function (o) {
+                return world.distance(x, o.x, y, o.y);
+            });
+            if (objects[0]) {
+                var dist = this.distance(x, objects[0].x, y, objects[0].y);
+                console.log(dist);
+                if (dist < range) {
+                    var invItem = objects[0];
+                    if (invItem) {
+                        // remove from map
+                        objects[0].on.objects = _.reject(objects[0].on.objects, function (o) {
+                            return o.id === objects[0].id;
+                        });
+                        game.objects = _.reject(game.objects, function (o) {
+                            return o.id === objects[0].id;
+                        });
+                        return invItem;
+                    }
+                }
+            }
+        }
+        return null;
+    };
+    World.prototype.dropMapItem = function (item, sprite, game) {
+        // get space in front of player
+        var range = (this.tileSize / 4), x = sprite.x + (sprite.currAnim === 1 ? range : sprite.currAnim === 3 ? -range : 0), y = sprite.y + (sprite.currAnim === 2 ? range : sprite.currAnim === 0 ? -range : 0);
+        var block = this.getBlock(x, y);
+        item.x = x;
+        item.y = y;
+        item.on = block;
+        item.sectionId = block.sectionId;
+        block.objects.push(item);
+        game.objects.push(item);
     };
     World.prototype.randShape = function (cx, cy, d, smooth, type, overwrite) {
         var startX = Math.round(cx - d - (d * Math.random())), endX = Math.round(cx + d + (d * Math.random())), startY = cy - d, endY = cy + d, prevPushA = 0, prevPushB = 0;
@@ -396,6 +451,30 @@ var World = (function () {
     World.prototype.getBlock = function (x, y) {
         var yIndex = Math.floor(y / this.tileSize), xIndex = Math.floor(x / this.tileSize);
         return this.grid[yIndex][xIndex];
+    };
+    World.prototype.getSurroundingBlocks = function (x, y) {
+        var blocks = [], block = this.getBlock(x, y);
+        blocks.push(block.upperLeft);
+        blocks.push(block.above);
+        blocks.push(block.upperRight);
+        blocks.push(block.left);
+        blocks.push(block);
+        blocks.push(block.right);
+        blocks.push(block.lowerLeft);
+        blocks.push(block.below);
+        blocks.push(block.lowerRight);
+        return blocks;
+    };
+    World.prototype.getBlocksObjects = function (blocks) {
+        var objects = [];
+        for (var b in blocks) {
+            if (blocks[b]) {
+                for (var o in blocks[b].objects) {
+                    objects.push(blocks[b].objects[o]);
+                }
+            }
+        }
+        return objects;
     };
     World.prototype.getSectionId = function (x, y, measurement) {
         if (measurement === "p") {

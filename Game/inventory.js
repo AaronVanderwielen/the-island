@@ -1,40 +1,27 @@
-var InventoryItemType;
-(function (InventoryItemType) {
-    InventoryItemType[InventoryItemType["stick"] = 0] = "stick";
-    InventoryItemType[InventoryItemType["rock"] = 1] = "rock";
-    InventoryItemType[InventoryItemType["hemp"] = 2] = "hemp";
-    InventoryItemType[InventoryItemType["bone"] = 3] = "bone";
-    InventoryItemType[InventoryItemType["clay"] = 4] = "clay";
-    InventoryItemType[InventoryItemType["berries"] = 5] = "berries";
-    InventoryItemType[InventoryItemType["mushroom"] = 6] = "mushroom";
-    InventoryItemType[InventoryItemType["roots"] = 7] = "roots";
-    InventoryItemType[InventoryItemType["lumber"] = 8] = "lumber";
-    InventoryItemType[InventoryItemType["plank"] = 9] = "plank";
-    InventoryItemType[InventoryItemType["twine"] = 10] = "twine";
-    InventoryItemType[InventoryItemType["rope"] = 11] = "rope";
-    InventoryItemType[InventoryItemType["sand"] = 12] = "sand";
-    InventoryItemType[InventoryItemType["brick"] = 13] = "brick";
-    InventoryItemType[InventoryItemType["meat"] = 14] = "meat";
-    InventoryItemType[InventoryItemType["skin"] = 15] = "skin";
-    InventoryItemType[InventoryItemType["canvas"] = 16] = "canvas";
-    InventoryItemType[InventoryItemType["knife"] = 17] = "knife";
-    InventoryItemType[InventoryItemType["axe"] = 18] = "axe";
-})(InventoryItemType || (InventoryItemType = {}));
 var Inventory = (function () {
-    function Inventory(carryCapacity) {
+    function Inventory(carryCapacity, itemset) {
+        this.itemset = itemset;
+        this.carrying = [];
         this.carryCapacity = carryCapacity;
+        for (var i = 0; i < carryCapacity; i++) {
+            this.carrying[i] = null;
+        }
         this.holding = null;
         this.focusedIndex = null;
         this.changes = true;
+        this.focusedHolding = false;
+        this.focusedIndex = 0;
+        this.secondaryFocusActive = false;
+        this.secondaryFocusHolding = false;
+        this.secondaryFocusIndex = 0;
+        this.active = false;
     }
     Inventory.prototype.toggle = function () {
         // player either begins interacting with their inventory or cancels
-        if (this.focusedIndex === null) {
-            this.focusedIndex = 0;
-        }
-        else {
-            this.focusedIndex = null;
-        }
+        this.active = !this.active;
+        // if there was a secondary action (moving items) cancel it
+        this.secondaryFocusActive = false;
+        this.secondarySelection = null;
     };
     Inventory.prototype.equip = function (item) {
         var success = false;
@@ -52,48 +39,91 @@ var Inventory = (function () {
         }
         return success;
     };
-    Inventory.prototype.pickup = function (item) {
-        var itemReceived = false;
-        if (this.putInBag(item)) {
-            itemReceived = true;
+    Inventory.prototype.pickup = function (mItem) {
+        var numReceived = 0, invItem = mItem.toInventoryItem(), stack = invItem.stack, tryBag;
+        while (stack > 0 && tryBag !== 0) {
+            tryBag = this.putInBag(invItem, stack);
+            numReceived += tryBag;
+            stack -= tryBag;
         }
-        else {
-            // no available slot, are hands available?
-            if (this.holding == null) {
-                this.holding = item;
-                itemReceived = true;
-            }
+        if (stack > 0) {
+            // no available slot or filled available slots, are hands available?
+            var tryHands = this.putInHands(invItem, stack);
+            numReceived += tryHands;
+            stack -= tryHands;
         }
-        return itemReceived;
+        return numReceived;
     };
-    Inventory.prototype.putInBag = function (item) {
-        var success = false;
+    Inventory.prototype.putInBag = function (item, stack) {
+        var numReceived = 0;
         // maybe it's a stackable item?
-        var availableStack = _.find(this.carrying, function (i) {
-            return i.type == item.type && i.stack < i.maxStack;
+        var existingStack = _.find(this.carrying, function (i) {
+            return i && i.type == item.type && i.stack < i.maxStack;
         });
-        if (availableStack) {
-            // add to inventory stack
-            success = true;
+        if (existingStack) {
+            while (existingStack.stack < existingStack.maxStack && stack > 0) {
+                existingStack.stack++;
+                stack--;
+                numReceived++;
+            }
         }
         else {
             // no available stack, check if there is inventory space
-            if (this.carrying.length < this.carryCapacity) {
+            var emptySlot = this.carrying.indexOf(null);
+            if (emptySlot > -1) {
                 // add to open inventory slot
-                success = true;
+                this.carrying[emptySlot] = item;
+                this.carrying[emptySlot].stack = 0;
+                while (this.carrying[emptySlot].stack < this.carrying[emptySlot].maxStack && stack > 0) {
+                    this.carrying[emptySlot].stack++;
+                    stack--;
+                    numReceived++;
+                }
             }
         }
-        return success;
+        return numReceived;
+    };
+    Inventory.prototype.putInHands = function (item, stack) {
+        var numReceived = 0;
+        if (this.holding == null) {
+            this.holding = item;
+            this.holding.stack = 0;
+            while (this.holding.stack < this.holding.maxStack && stack > 0) {
+                this.holding.stack++;
+                stack--;
+                numReceived++;
+            }
+        }
+        else if (this.holding.type === item.type) {
+            while (this.holding.stack < this.holding.maxStack && stack > 0) {
+                this.holding.stack++;
+                stack--;
+                numReceived++;
+            }
+        }
+        return numReceived;
     };
     Inventory.prototype.moveToBag = function () {
         var success = false;
-        if (this.holding) {
-            if (this.putInBag(this.holding)) {
-                this.holding = null;
-                success = true;
+        //if (this.holding) {
+        //    if (this.putInBag(this.holding)) {
+        //        this.holding = null;
+        //        success = true;
+        //    }
+        //}
+        return success;
+    };
+    Inventory.prototype.secondaryAction = function () {
+        if (this.secondarySelection) {
+            var holdingIsTarget = (this.secondarySelection == "holding"), holdingIndex = holdingIsTarget ? -1 : parseInt(this.secondarySelection);
+            // swapping two items, one already selected
+            if (this.secondaryFocusHolding) {
+            }
+            else {
             }
         }
-        return success;
+        else {
+        }
     };
     // drop from hand
     Inventory.prototype.drop = function (item) {
@@ -104,47 +134,74 @@ var Inventory = (function () {
     // drop from inventory
     Inventory.prototype.dropInv = function (index, dropStack) {
         var dropped = null;
-        if (this.carrying[index].stack === 1) {
-            dropped = this.carrying[index];
-            this.carrying[index] = null;
-        }
-        else if (dropStack) {
-            dropped = this.carrying[index];
-            this.carrying[index] = null;
-        }
-        else {
-            this.carrying[index].stack--;
-            dropped = {
-                type: this.carrying[index].type,
-                maxStack: this.carrying[index].maxStack,
-                stack: 1
-            };
+        if (this.carrying[index]) {
+            if (this.carrying[index].stack === 1) {
+                dropped = new MapItem(this.itemset, null, this.carrying[index]);
+                this.carrying[index] = null;
+            }
+            else if (dropStack) {
+                dropped = new MapItem(this.itemset, null, this.carrying[index]);
+                this.carrying[index] = null;
+            }
+            else {
+                dropped = new MapItem(this.itemset, null, this.carrying[index], 1);
+                this.carrying[index].stack--;
+            }
         }
         return dropped;
     };
     Inventory.prototype.draw = function (canvas) {
-        var ctx = canvas.getContext('2d'), boxLength = 75, startX = boxLength / 2, startY = canvas.height - boxLength * 3.5;
+        var ctx = canvas.getContext('2d'), boxLength = 50, startX = boxLength / 2, startY = canvas.height - boxLength * 3.5;
         if (this.changes) {
-            var tempCanvas = document.createElement('canvas'), tempCtx = tempCanvas.getContext('2d'), borderWidth = 2, borderColor = '#000', fillColor = '#999';
+            var tempCanvas = document.createElement('canvas'), tempCtx = tempCanvas.getContext('2d'), borderWidth = 1, borderColor = '#000', fillColor = 'rgba(0, 0, 0, 0.5)', focusColor = 'rgba(100, 100, 0, 0.5)', secondaryFocusColor = 'rgba(100, 100, 0, 0.5)';
             tempCanvas.width = this.carryCapacity * boxLength;
             tempCanvas.height = boxLength * 3;
             tempCtx.lineWidth = borderWidth;
-            tempCtx.fillStyle = '#999';
-            tempCtx.strokeStyle = "#000";
+            tempCtx.fillStyle = fillColor;
+            tempCtx.strokeStyle = borderColor;
             // draw holding
-            //tempCtx.fillRect(borderWidth / 2, borderWidth / 2, boxLength * 1.5, boxLength * 1.5);
+            if (this.active) {
+                if (this.focusedHolding) {
+                    tempCtx.fillStyle = focusColor;
+                }
+                if (this.secondaryFocusHolding) {
+                    tempCtx.fillStyle = secondaryFocusColor;
+                }
+            }
+            tempCtx.fillRect(0, 0, boxLength * 1.5, boxLength * 1.5);
             tempCtx.rect(0, 0, boxLength * 1.5, boxLength * 1.5);
             tempCtx.stroke();
+            if (this.holding) {
+                // draw item image
+                tempCtx.drawImage(this.holding.img, 0, 0, this.holding.img.width, this.holding.img.height, 0, 0, boxLength * 1.5, boxLength * 1.5);
+                // text for stack count
+                tempCtx.fillStyle = "#fff";
+                tempCtx.font = "bold 16px Arial";
+                tempCtx.fillText(this.holding.stack.toString(), 15, 15);
+            }
             for (var i = 0; i < this.carryCapacity; i++) {
-                if (this.focusedIndex === i) {
-                    borderColor = '#ff0';
+                tempCtx.lineWidth = borderWidth;
+                tempCtx.fillStyle = fillColor;
+                tempCtx.strokeStyle = borderColor;
+                if (this.active) {
+                    if (!this.focusedHolding && this.focusedIndex === i) {
+                        tempCtx.fillStyle = focusColor;
+                    }
+                    if (this.secondaryFocusHolding) {
+                        tempCtx.fillStyle = secondaryFocusColor;
+                    }
                 }
-                else {
-                    borderColor = '#000';
-                }
-                //tempCtx.fillRect(i * boxLength, boxLength * 2, boxLength, boxLength);
+                tempCtx.fillRect(i * boxLength, boxLength * 2, boxLength, boxLength);
                 tempCtx.rect(i * boxLength, boxLength * 2, boxLength, boxLength);
                 tempCtx.stroke();
+                if (this.carrying[i]) {
+                    // draw item image
+                    tempCtx.drawImage(this.carrying[i].img, 0, 0, this.carrying[i].img.width, this.carrying[i].img.height, i * boxLength, boxLength * 2, boxLength, boxLength);
+                    // text for stack count
+                    tempCtx.fillStyle = "#fff";
+                    tempCtx.font = "bold 16px Arial";
+                    tempCtx.fillText(this.carrying[i].stack.toString(), i * boxLength, boxLength * 2.25);
+                }
             }
             this.cached = tempCanvas;
         }

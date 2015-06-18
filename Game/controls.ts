@@ -1,20 +1,25 @@
 ﻿interface ButtonAction {
     button: number;
     recorded: boolean;
-    fade: number;
 }
 
 class Controls {
     fps: number;
     x: number;
     y: number;
+    lookx: number;
+    looky: number;
     strength: number;
+    sprinting: boolean;
+    looking: boolean;
     actions: Array<ButtonAction>;
 
     constructor(fps: number) {
         this.fps = fps;
         this.x = 0;
         this.y = 0;
+        this.lookx = 0;
+        this.looky = 0;
         this.strength = 0;
         this.actions = [];
     }
@@ -30,21 +35,15 @@ class Controls {
                     // new action
                     this.actions.push({
                         button: i,
-                        recorded: false,
-                        fade: 0
+                        recorded: false
                     });
                 }
             }
             else {
                 // no longer holding button
                 if (existingAction) {
-                    // iterate time spent not holding
-                    existingAction.fade++;
-
-                    if (existingAction.fade > this.fps) {
-                        // remove from actions
-                        this.actions = _.reject(this.actions, function (a) { return a.button === i; });
-                    }
+                    // remove from actions
+                    this.actions = _.reject(this.actions, function (a) { return a.button === i; });
                 }
             }
         }
@@ -57,12 +56,19 @@ class Controls {
 
             this.x = x;
             this.y = y;
-            this.strength = gp.buttons[7].pressed ? strength * 2 : strength;
-            //sprite.move(x, y, strength);
+            this.strength = strength;
         }
         else {
             this.strength = 0;
         }
+
+        if (Math.abs(gp.axes[3]) > 0.1 || Math.abs(gp.axes[2]) > 0.1) {
+            this.lookx = gp.axes[2];
+            this.looky = gp.axes[3];
+        }
+
+        this.looking = gp.buttons[6].pressed;
+        this.sprinting = gp.buttons[7].pressed;
     }
 
     start() {

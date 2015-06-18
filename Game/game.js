@@ -17,9 +17,9 @@ var Game = (function () {
     Game.prototype.init = function () {
         this.loadAssets(function () {
             var tileset = this.getAssetById('terrain').value, itemset = this.getAssetById('items').value;
-            this.world = new World(100, 100, 100, 5, tileset, itemset, this.objects);
+            this.world = new World(200, 200, 100, 5, tileset, itemset, this.objects);
             this.sound = new Sound();
-            this.player = new Player();
+            this.player = new Player(itemset);
             this.player.controls = new Controls(this.fps);
             this.player.sprite = new Sprite(this.getAssetById('char'));
             this.player.sprite.x = 2000;
@@ -61,7 +61,7 @@ var Game = (function () {
         }, 1000 / obj.fps);
     };
     Game.prototype.stateUpdate = function () {
-        this.player.update(this.world, this.sound);
+        this.player.update(this, this.world, this.sound);
     };
     Game.prototype.refresh = function () {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -72,7 +72,7 @@ var Game = (function () {
     Game.prototype.drawMapObjects = function () {
         this.objects = _.sortBy(this.objects, function (o) {
             var sortBy = o.z.toString();
-            if (o.type == MapObjectType.sprite)
+            if (o.mapObjectType == 1 /* sprite */)
                 sortBy += (o.passing ? "0" : "2");
             else
                 sortBy += "1";
@@ -114,4 +114,10 @@ $(function () {
         game.init();
     }
 });
+function guid() {
+    function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+}
 //# sourceMappingURL=game.js.map
