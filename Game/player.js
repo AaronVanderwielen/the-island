@@ -14,7 +14,7 @@ var Player = (function () {
                 switch (action.button) {
                     case 0:
                         if (this.inventory.active) {
-                            this.inventory.focusedIndex;
+                            this.inventory.secondaryAction();
                         }
                         else {
                             world.interactMapObject(this, game);
