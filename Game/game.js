@@ -1,5 +1,5 @@
 var Game = (function () {
-    function Game(canvas, resX, resY, fps) {
+    function Game(canvas, resX, resY, fps, maxFps) {
         this.canvas = canvas;
         this.canvas.width = resX;
         this.canvas.height = resY;
@@ -7,12 +7,16 @@ var Game = (function () {
         this.resX = resX;
         this.resY = resY;
         this.fps = fps;
+        this.maxFps = maxFps;
         this.objects = new Array();
         this.assets = [
             { id: 'char', src: '/img/char.png' },
             { id: 'terrain', src: "/img/terrain.png" },
             { id: 'items', src: "/img/itemset.png" }
         ];
+        this.testArray1 = [];
+        this.testArray2 = [];
+        this.testArray3 = [];
     }
     Game.prototype.init = function () {
         this.loadAssets(function () {
@@ -53,48 +57,102 @@ var Game = (function () {
     };
     Game.prototype.start = function () {
         var obj = this;
-        window.setInterval(function () {
-            obj.stateUpdate();
-        }, 15);
-        window.setInterval(function () {
-            obj.refresh();
-        }, 1000 / obj.fps);
+        this.monitorInterval(obj.stateUpdate.bind(obj), 15, $('#state-duration'), 'state');
+        this.monitorInterval(obj.refresh.bind(obj), (1000 / this.fps), $('#refresh-duration'), 'refresh', true);
+    };
+    Game.prototype.monitorInterval = function (f, ms, el, label, controlsFPS) {
+        var obj = this, arr = [], interval, monitorFunc = function () {
+            var start = new Date(), duration;
+            f();
+            duration = new Date().getTime() - start.getTime();
+            arr.push(duration);
+            if (arr.length > obj.fps / 2) {
+                var ave, sum = 0;
+                for (var i = 0; i < arr.length; i++) {
+                    sum += arr[i];
+                }
+                ave = (sum / arr.length).toFixed(2);
+                el.html(label + ": " + ave + "ms");
+                arr = [];
+                if (controlsFPS) {
+                    if (ave > ms) {
+                        ms++;
+                        clearInterval(interval);
+                        obj.fps = Math.round(1000 / ms);
+                        $('#fps').html('fps: ' + obj.fps);
+                        interval = setInterval(monitorFunc, ms);
+                    }
+                    else if ((ave < (ms - 3)) && (Math.round(1000 / ms) < obj.maxFps)) {
+                        ms--;
+                        clearInterval(interval);
+                        obj.fps = Math.round(1000 / ms);
+                        $('#fps').html('fps: ' + obj.fps);
+                        interval = setInterval(monitorFunc, ms);
+                    }
+                }
+            }
+        };
+        interval = setInterval(monitorFunc, ms);
+    };
+    Game.prototype.monitorFunction = function (f, arr, el, label) {
+        var params = [];
+        for (var _i = 4; _i < arguments.length; _i++) {
+            params[_i - 4] = arguments[_i];
+        }
+        var obj = this, start = new Date(), duration;
+        f.apply(this, params);
+        duration = new Date().getTime() - start.getTime();
+        arr.push(duration);
+        if (arr.length > obj.fps / 2) {
+            var ave, sum = 0;
+            for (var i = 0; i < arr.length; i++) {
+                sum += arr[i];
+            }
+            ave = (sum / arr.length).toFixed(2);
+            el.html(label + ": " + ave + "ms");
+            arr = [];
+        }
     };
     Game.prototype.stateUpdate = function () {
         this.player.update(this, this.world, this.sound);
     };
     Game.prototype.refresh = function () {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.moveViewCenter(this.player.sprite);
-        this.drawMapObjects();
-        this.player.inventory.draw(this.canvas);
+        //this.moveViewCenter(this.player.sprite);
+        this.monitorFunction(this.moveViewCenter.bind(this), this.testArray1, $('#draw-view-duration'), 'move view', this.player.sprite);
+        //this.drawMapObjects.bind(this)
+        this.monitorFunction(this.drawMapObjects.bind(this), this.testArray1, $('#draw-map-objects-duration'), 'map objects');
+        //this.player.inventory.draw(this.canvas);
+        //this.monitorFunction(this.player.inventory.draw.bind(this.player.inventory), this.testArray2, $('#draw-inventory-duration'), 'inventory', this.canvas);
     };
     Game.prototype.drawMapObjects = function () {
-        this.objects = _.sortBy(this.objects, function (o) {
-            var sortBy = o.z.toString();
-            if (o.mapObjectType == 1 /* sprite */)
-                sortBy += (o.passing ? "0" : "2");
-            else
-                sortBy += "1";
-            return sortBy;
-        });
-        for (var o in this.objects) {
-            this.objects[o].draw(this.ctx, this.view);
+        var currSection = this.player.sprite.sectionId;
+        if (currSection) {
+            // only draw objects that are around current player's section
+            var acceptSections = this.world.getSurroundingSections(currSection), drawObjects = _.filter(this.objects, function (o) {
+                return acceptSections.indexOf(o.sectionId) > -1;
+            });
+            // sort by z index
+            drawObjects = _.sortBy(drawObjects, function (o) {
+                var sortBy = o.z.toString();
+                if (o.mapObjectType == MapObjectType.sprite)
+                    sortBy += (o.passing ? "0" : "2");
+                else
+                    sortBy += "1";
+                return sortBy;
+            });
+            // draw
+            for (var o in drawObjects) {
+                drawObjects[o].draw(this.ctx, this.view);
+            }
         }
     };
     Game.prototype.renderView = function () {
-        var ctx = this.canvas.getContext("2d"), ySection = Math.floor(this.player.sprite.y / this.world.pyps), xSection = Math.floor(this.player.sprite.x / this.world.pxps), cachedId = ySection + "," + xSection, cachedStartY = this.view.startY - ((ySection - 1) * this.world.pyps), cachedStartX = this.view.startX - ((xSection - 1) * this.world.pxps);
+        var ctx = this.canvas.getContext("2d"), ySection = Math.floor(this.player.sprite.y / this.world.pyps), xSection = Math.floor(this.player.sprite.x / this.world.pxps), currSectionId = ySection + "," + xSection, cachedStartY = this.view.startY - ((ySection - 1) * this.world.pyps), cachedStartX = this.view.startX - ((xSection - 1) * this.world.pxps);
         // logging
         var info = document.getElementById('view');
-        info.innerHTML = "";
-        info.innerHTML += 'xSection: ' + xSection + '<br />';
-        info.innerHTML += 'ySection: ' + ySection + '<br />';
-        if (cachedId !== this.world.cachedId) {
-            // need to render a new 3x3 cached canvas
-            console.log('refreshing cached canvas');
-            this.world.refreshCached(ySection, xSection);
-        }
-        ctx.drawImage(this.world.cached, cachedStartX, cachedStartY, this.resX, this.resY, 0, 0, this.resX, this.resY);
+        info.innerHTML = currSectionId;
+        ctx.drawImage(this.world.worldCache[currSectionId], cachedStartX, cachedStartY, this.resX, this.resY, 0, 0, this.resX, this.resY);
     };
     Game.prototype.moveViewCenter = function (userSprite) {
         var newStartX = userSprite.x - (this.resX / 2), newEndX = newStartX + this.resX, newStartY = userSprite.y - (this.resY / 2), newEndY = newStartY + this.resY;
@@ -110,14 +168,17 @@ var Game = (function () {
 })();
 $(function () {
     if ("getGamepads" in navigator) {
-        var canvas = $('canvas')[0], game = new Game(canvas, window.innerWidth, window.innerHeight, 60);
+        var canvas = $('canvas')[0], game = new Game(canvas, window.innerWidth, window.innerHeight, 30, 60);
         game.init();
     }
 });
 function guid() {
     function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+        return Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
     }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+        s4() + '-' + s4() + s4() + s4();
 }
 //# sourceMappingURL=game.js.map

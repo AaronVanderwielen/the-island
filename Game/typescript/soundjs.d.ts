@@ -14,7 +14,6 @@
 
 /// <reference path="createjs-lib.d.ts" />
 /// <reference path="preloadjs.d.ts" />
-/// <reference path="../webaudioapi/waa.d.ts" />
 
 declare module createjs {
 

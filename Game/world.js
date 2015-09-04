@@ -28,39 +28,31 @@ var World = (function () {
         this.pxps = this.bxps * this.tileSize; // pixels x per section
         // create cached canvas--will be used to hold 3 x 3 sections, updated on section change
         // this is where the viewport is extracted from
-        this.cached = document.createElement('canvas');
-        this.cached.width = this.pxps * 3;
-        this.cached.height = this.pyps * 3;
-        var ctx = this.cached.getContext('2d');
-        // create section canvases
-        this.sections = [];
-        for (var sy = 0; sy < this.sectionsY; sy++) {
-            for (var sx = 0; sx < this.sectionsX; sx++) {
-                if (sx === 0) {
-                    this.sections[sy] = [];
-                }
-                this.sections[sy][sx] = document.createElement('canvas');
-                this.sections[sy][sx].width = (this.numX / this.sectionsX) * tileSize;
-                this.sections[sy][sx].height = (this.numY / this.sectionsX) * tileSize;
-            }
-        }
+        this.worldCache = {};
         this.tileset = tileset;
         this.itemset = itemset;
+        // initialize canvases
+        this.sections = [];
+        this.createSectionCanvases();
+        // world
         this.initGrid();
         this.build();
-        this.render(objects);
+        this.applyTerrain(objects);
+        // cache
+        this.cacheSections();
     }
     World.prototype.initGrid = function () {
         this.grid = [];
+        // initialize empty blocks in grid
         for (var y = 0; y < this.numY; y++) {
             for (var x = 0; x < this.numX; x++) {
-                var sectionId = this.getSectionId(y, x, 'b'), block = {
+                var block = {
                     x: x,
                     y: y,
-                    sectionId: sectionId,
                     objects: [],
                     borders: function (terrain) {
-                        return terrain.indexOf(this.above.type) != -1 || terrain.indexOf(this.right.type) != -1 || terrain.indexOf(this.below.type) != -1 || terrain.indexOf(this.left.type) != -1 || terrain.indexOf(this.upperLeft.type) != -1 || terrain.indexOf(this.upperRight.type) != -1 || terrain.indexOf(this.lowerLeft.type) != -1 || terrain.indexOf(this.lowerRight.type) != -1;
+                        return terrain.indexOf(this.above.type) != -1 || terrain.indexOf(this.right.type) != -1 || terrain.indexOf(this.below.type) != -1 || terrain.indexOf(this.left.type) != -1 ||
+                            terrain.indexOf(this.upperLeft.type) != -1 || terrain.indexOf(this.upperRight.type) != -1 || terrain.indexOf(this.lowerLeft.type) != -1 || terrain.indexOf(this.lowerRight.type) != -1;
                     }
                 };
                 if (x === 0) {
@@ -69,6 +61,7 @@ var World = (function () {
                 this.grid[y][x] = block;
             }
         }
+        // apply pointers to nearby
         for (var j in this.grid) {
             var row = this.grid[j];
             for (var k in row) {
@@ -77,53 +70,96 @@ var World = (function () {
             }
         }
     };
+    World.prototype.createSectionCanvases = function () {
+        for (var sy = 0; sy < this.sectionsY; sy++) {
+            for (var sx = 0; sx < this.sectionsX; sx++) {
+                if (sx === 0) {
+                    this.sections[sy] = [];
+                }
+                this.sections[sy][sx] = document.createElement('canvas');
+                this.sections[sy][sx].width = (this.numX / this.sectionsX) * this.tileSize;
+                this.sections[sy][sx].height = (this.numY / this.sectionsX) * this.tileSize;
+                var newCanvas = document.createElement('canvas'), sectionId = sy + "," + sx;
+                newCanvas.width = this.pxps * 3;
+                newCanvas.height = this.pyps * 3;
+                newCanvas.ready = false;
+                this.worldCache[sectionId] = newCanvas;
+            }
+        }
+    };
+    World.prototype.cacheSections = function () {
+        for (var ySection = 0; ySection < this.sectionsY; ySection++) {
+            for (var xSection = 0; xSection < this.sectionsX; xSection++) {
+                var sectionId = ySection + "," + xSection, c = this.worldCache[sectionId], ctx = c.getContext('2d'), cy = 0;
+                // draw a 3 section x 3 section block
+                for (var sy = ySection - 1; sy <= ySection + 1; sy++) {
+                    var cx = 0;
+                    for (var sx = xSection - 1; sx <= xSection + 1; sx++) {
+                        if (this.sections[sy] && this.sections[sy][sx]) {
+                            // draw section onto cached
+                            ctx.drawImage(this.sections[sy][sx], 0, 0, this.pxps, this.pyps, cx * this.pxps, cy * this.pyps, this.pxps, this.pyps);
+                        }
+                        else {
+                            // blank section
+                            ctx.fillStyle = "#000";
+                            ctx.fillRect(cx * this.pxps, cy * this.pyps, this.pxps, this.pyps);
+                        }
+                        cx++;
+                    }
+                    cy++;
+                }
+                c.ready = true;
+                this.worldCache[sectionId] = c;
+            }
+        }
+    };
     World.prototype.build = function () {
         this.createOcean();
         this.createBeach();
         this.createMountain();
         // fill with dirt
-        this.fill(this.gradientSize * 4, this.numX - (this.gradientSize * 4), this.gradientSize * 4, this.numY - (this.gradientSize * 4), 3 /* dirt */, false);
+        this.fill(this.gradientSize * 4, this.numX - (this.gradientSize * 4), this.gradientSize * 4, this.numY - (this.gradientSize * 4), TerrainType.dirt, false);
         // add grass patches to dirt randomly
         this.createGrass(.03, 5);
         this.createRiversAndLakes(.005, .002);
     };
     World.prototype.createOcean = function () {
         // create deep water
-        this.layerEmptyTop(0, this.numX, 0, 0 /* ocean */, 1 /* shallow */, true);
-        this.layerEmptyRight(this.numX - 1, 0, this.numY, 0 /* ocean */, 1 /* shallow */, true);
-        this.layerEmptyBelow(0, this.numX, this.numY - 1, 0 /* ocean */, 1 /* shallow */, true);
-        this.layerEmptyLeft(0, 0, this.numY, 0 /* ocean */, 1 /* shallow */, true);
+        this.layerEmptyTop(0, this.numX, 0, TerrainType.ocean, TerrainType.shallow, true);
+        this.layerEmptyRight(this.numX - 1, 0, this.numY, TerrainType.ocean, TerrainType.shallow, true);
+        this.layerEmptyBelow(0, this.numX, this.numY - 1, TerrainType.ocean, TerrainType.shallow, true);
+        this.layerEmptyLeft(0, 0, this.numY, TerrainType.ocean, TerrainType.shallow, true);
         // shallow water/start of beach
-        this.layerEmptyTop(this.gradientSize, this.numX - this.gradientSize, this.gradientSize, 1 /* shallow */, 2 /* beach */);
-        this.layerEmptyRight(this.numX - this.gradientSize - 1, this.gradientSize, this.numY - this.gradientSize, 1 /* shallow */, 2 /* beach */);
-        this.layerEmptyBelow(this.gradientSize, this.numX - this.gradientSize, this.numY - this.gradientSize - 1, 1 /* shallow */, 2 /* beach */);
-        this.layerEmptyLeft(this.gradientSize, this.gradientSize, this.numY - this.gradientSize, 1 /* shallow */, 2 /* beach */);
+        this.layerEmptyTop(this.gradientSize, this.numX - this.gradientSize, this.gradientSize, TerrainType.shallow, TerrainType.beach);
+        this.layerEmptyRight(this.numX - this.gradientSize - 1, this.gradientSize, this.numY - this.gradientSize, TerrainType.shallow, TerrainType.beach);
+        this.layerEmptyBelow(this.gradientSize, this.numX - this.gradientSize, this.numY - this.gradientSize - 1, TerrainType.shallow, TerrainType.beach);
+        this.layerEmptyLeft(this.gradientSize, this.gradientSize, this.numY - this.gradientSize, TerrainType.shallow, TerrainType.beach);
     };
     World.prototype.createBeach = function () {
         var gOffset = 3;
-        this.layerEmptyTop(this.gradientSize * gOffset, this.numX - (this.gradientSize * gOffset) + 1, this.gradientSize * gOffset, 2 /* beach */, 3 /* dirt */);
-        this.layerEmptyRight(this.numX - 1 - (this.gradientSize * gOffset), this.gradientSize * gOffset, this.numY - (this.gradientSize * gOffset), 2 /* beach */, 3 /* dirt */);
-        this.layerEmptyBelow(this.gradientSize * gOffset, this.numX - (this.gradientSize * gOffset) + 1, this.numY - 1 - (this.gradientSize * gOffset), 2 /* beach */, 3 /* dirt */);
-        this.layerEmptyLeft(this.gradientSize * gOffset, this.gradientSize * gOffset, this.numY - (this.gradientSize * gOffset) + 1, 2 /* beach */, 3 /* dirt */);
+        this.layerEmptyTop(this.gradientSize * gOffset, this.numX - (this.gradientSize * gOffset) + 1, this.gradientSize * gOffset, TerrainType.beach, TerrainType.dirt);
+        this.layerEmptyRight(this.numX - 1 - (this.gradientSize * gOffset), this.gradientSize * gOffset, this.numY - (this.gradientSize * gOffset), TerrainType.beach, TerrainType.dirt);
+        this.layerEmptyBelow(this.gradientSize * gOffset, this.numX - (this.gradientSize * gOffset) + 1, this.numY - 1 - (this.gradientSize * gOffset), TerrainType.beach, TerrainType.dirt);
+        this.layerEmptyLeft(this.gradientSize * gOffset, this.gradientSize * gOffset, this.numY - (this.gradientSize * gOffset) + 1, TerrainType.beach, TerrainType.dirt);
     };
     World.prototype.createGrass = function (chance, size) {
         for (var y = 0; y < this.numY; y++) {
             for (var x = 0; x < this.numX; x++) {
                 var block = this.grid[y][x];
-                if (block.type === 3 /* dirt */) {
+                if (block.type === TerrainType.dirt) {
                     // roll for grass
                     var rand = Math.random();
                     if (rand <= chance) {
-                        this.randShape(x, y, Math.round(Math.random() * size), 1, 4 /* grass */, [3 /* dirt */]);
+                        this.randShape(x, y, Math.round(Math.random() * size), 1, TerrainType.grass, [TerrainType.dirt]);
                     }
                 }
             }
         }
     };
     World.prototype.createMountain = function () {
-        this.randShape(Math.round(this.numX / 2), Math.round(this.numY / 2), this.gradientSize * 4, 1, 5 /* rock */);
-        this.randShape(Math.round(this.numX / 2), Math.round(this.numY / 2), this.gradientSize * 2, 1, 6 /* mountain */, [5 /* rock */]);
-        this.randShape(Math.round(this.numX / 2), Math.round(this.numY / 2), Math.round(this.gradientSize / 3), 1, 7 /* lava */, [6 /* mountain */]);
+        this.randShape(Math.round(this.numX / 2), Math.round(this.numY / 2), this.gradientSize * 4, 1, TerrainType.rock);
+        this.randShape(Math.round(this.numX / 2), Math.round(this.numY / 2), this.gradientSize * 2, 1, TerrainType.mountain, [TerrainType.rock]);
+        this.randShape(Math.round(this.numX / 2), Math.round(this.numY / 2), Math.round(this.gradientSize / 3), 1, TerrainType.lava, [TerrainType.mountain]);
     };
     World.prototype.createRiversAndLakes = function (riverChance, lakeChance) {
         for (var y = 0; y < this.numY; y++) {
@@ -131,24 +167,24 @@ var World = (function () {
                 for (var x = 0; x < this.numX; x++) {
                     if (x < this.gradientSize * 3 || x > this.numX - (this.gradientSize * 3)) {
                         var block = this.grid[y][x];
-                        if (block.type === 1 /* shallow */) {
+                        if (block.type === TerrainType.shallow) {
                             // roll for river
                             var riverRoll = Math.random();
                             if (riverRoll <= riverChance) {
                                 console.log('river starting at ' + y + ',' + x);
                                 // now snake towards mountain
                                 var distX = (this.numX / 3) - block.x, distY = (this.numY / 2) - block.y, nextX = block.x, nextY = block.y, prevDir = (block.x > this.gradientSize * 4 && block.x < this.numX - this.gradientSize * 4) ? 'y' : 'x', nextBlock = block;
-                                while ((distX !== 0 || distY !== 0) && block.type !== 6 /* mountain */) {
+                                while ((distX !== 0 || distY !== 0) && block.type !== TerrainType.mountain) {
                                     // roll for lake
                                     var lakeRoll = Math.random();
                                     if (lakeRoll <= lakeChance) {
                                         console.log('river ending with lake at ' + nextBlock.y + ',' + nextBlock.x);
-                                        this.randShape(nextBlock.x, nextBlock.y, Math.ceil(Math.random() * (this.gradientSize)), 1, 0 /* ocean */, [1 /* shallow */, 2 /* beach */, 3 /* dirt */, 4 /* grass */, 5 /* rock */]);
-                                        this.randShape(nextBlock.x, nextBlock.y, Math.ceil(this.gradientSize + (Math.random() * this.gradientSize)), 1, 1 /* shallow */, [2 /* beach */, 3 /* dirt */, 4 /* grass */, 5 /* rock */]);
+                                        this.randShape(nextBlock.x, nextBlock.y, Math.ceil(Math.random() * (this.gradientSize)), 1, TerrainType.ocean, [TerrainType.shallow, TerrainType.beach, TerrainType.dirt, TerrainType.grass, TerrainType.rock]);
+                                        this.randShape(nextBlock.x, nextBlock.y, Math.ceil(this.gradientSize + (Math.random() * this.gradientSize)), 1, TerrainType.shallow, [TerrainType.beach, TerrainType.dirt, TerrainType.grass, TerrainType.rock]);
                                         break;
                                     }
                                     else {
-                                        this.randShape(nextBlock.x, nextBlock.y, Math.ceil(Math.random() * (this.gradientSize / 2)), 0, 1 /* shallow */, [2 /* beach */, 3 /* dirt */, 4 /* grass */, 5 /* rock */]);
+                                        this.randShape(nextBlock.x, nextBlock.y, Math.ceil(Math.random() * (this.gradientSize / 2)), 0, TerrainType.shallow, [TerrainType.beach, TerrainType.dirt, TerrainType.grass, TerrainType.rock]);
                                         var chanceX = Math.random(), chanceY = Math.random();
                                         if (distX !== 0 && chanceX < (prevDir === 'x' ? .8 : .2)) {
                                             prevDir = 'x';
@@ -183,13 +219,13 @@ var World = (function () {
         for (var y = 0; y < this.numY; y++) {
             for (var x = 0; x < this.numX; x++) {
                 var block = this.grid[y][x];
-                if (block.type == 4 /* grass */ && !block.borders([1 /* shallow */])) {
+                if (block.type == TerrainType.grass && !block.borders([TerrainType.shallow])) {
                     // roll for lake
                     var roll = Math.random();
                     if (roll < lakeChance) {
                         console.log("creating lake at " + block.y + ',' + block.x);
-                        this.randShape(block.x, block.y, Math.ceil(Math.random() * (this.gradientSize)), 1, 0 /* ocean */, [1 /* shallow */, 2 /* beach */, 3 /* dirt */, 4 /* grass */, 5 /* rock */]);
-                        this.randShape(block.x, block.y, Math.ceil(this.gradientSize + (Math.random() * this.gradientSize)), 1, 1 /* shallow */, [2 /* beach */, 3 /* dirt */, 4 /* grass */, 5 /* rock */]);
+                        this.randShape(block.x, block.y, Math.ceil(Math.random() * (this.gradientSize)), 1, TerrainType.ocean, [TerrainType.shallow, TerrainType.beach, TerrainType.dirt, TerrainType.grass, TerrainType.rock]);
+                        this.randShape(block.x, block.y, Math.ceil(this.gradientSize + (Math.random() * this.gradientSize)), 1, TerrainType.shallow, [TerrainType.beach, TerrainType.dirt, TerrainType.grass, TerrainType.rock]);
                     }
                 }
             }
@@ -198,6 +234,7 @@ var World = (function () {
     World.prototype.rollForItem = function (block, chanceTypes, objects) {
         // roll for chance
         var rand = Math.random(), prev = 0;
+        // chance types = [{ c: .1, types: [] }]
         for (var c in chanceTypes) {
             if (rand >= prev && rand <= prev + chanceTypes[c].c) {
                 // now pick random item
@@ -229,13 +266,9 @@ var World = (function () {
         // get space in front of player
         var range = (this.tileSize / 4), x = sprite.x + (sprite.currAnim === 1 ? range : sprite.currAnim === 3 ? -range : 0), y = sprite.y + (sprite.currAnim === 2 ? range : sprite.currAnim === 0 ? -range : 0);
         var blocks = this.getSurroundingBlocks(sprite.x, sprite.y), objects = this.getBlocksObjects(blocks), world = this;
-        objects = _.filter(objects, function (o) {
-            return o.mapObjectType == 0 /* item */ && o.canPickup;
-        });
+        objects = _.filter(objects, function (o) { return o.mapObjectType == MapObjectType.item && o.canPickup; });
         if (objects.length > 0) {
-            objects = _.sortBy(objects, function (o) {
-                return world.distance(x, o.x, y, o.y);
-            });
+            objects = _.sortBy(objects, function (o) { return world.distance(x, o.x, y, o.y); });
             if (objects[0]) {
                 var dist = this.distance(x, objects[0].x, y, objects[0].y);
                 console.log(dist);
@@ -279,6 +312,7 @@ var World = (function () {
         endY = endY < this.numY ? endY : this.numY - 1;
         for (var x = startX; x <= endX; x++) {
             var xFactor = d - Math.abs(cx - x), pushA = Math.round(d * Math.random()) + (xFactor > d / 2 ? d / 2 : xFactor), evenedA = pushA, pushB = Math.round(d * Math.random()) + (xFactor > d / 2 ? d / 2 : xFactor), evenedB = pushB;
+            // for n of smooth, make this next one closer previous
             for (var s = 0; s < smooth; s++) {
                 evenedA = Math.round((evenedA + prevPushA) / 2);
                 evenedB = Math.round((evenedB + prevPushB) / 2);
@@ -351,6 +385,7 @@ var World = (function () {
         for (var y = startY; y < endY; y++) {
             // generate values for random edges
             var random = Math.random(), push = Math.round((this.gradientSize * random)), middle = Math.round((push + prevPush) / 2); // keeps close rows similar 
+            // loop through min * 2 for x and set the ocean/beach values
             for (var x = startX; x < startX + (this.gradientSize * 2); x++) {
                 if (overwrite || !this.typeIsSet(this.grid[y][x])) {
                     if (x < startX + this.gradientSize + middle) {
@@ -364,7 +399,7 @@ var World = (function () {
             prevPush = push;
         }
     };
-    World.prototype.render = function (objects) {
+    World.prototype.applyTerrain = function (objects) {
         for (var sy = 0; sy < this.sectionsY; sy++) {
             for (var sx = 0; sx < this.sectionsX; sx++) {
                 var ctx = this.sections[sy][sx].getContext("2d"), startX = sx * (this.numX / this.sectionsX), endX = startX + (this.numX / this.sectionsX), startY = sy * (this.numY / this.sectionsY), endY = startY + (this.numY / this.sectionsY);
@@ -372,7 +407,8 @@ var World = (function () {
                     var row = this.grid[y];
                     for (var x = startX; x < endX; x++) {
                         var block = row[x];
-                        this.renderBlock(block, sy, sx, ctx, objects);
+                        block.sectionId = sy + "," + sx;
+                        this.blockInitialization(block, sy, sx, ctx, objects);
                     }
                 }
             }
@@ -383,36 +419,36 @@ var World = (function () {
         //    }
         //}
     };
-    World.prototype.renderBlock = function (block, ySection, xSection, ctx, objects) {
+    World.prototype.blockInitialization = function (block, ySection, xSection, ctx, objects) {
         var startBlockY = (block.y - (ySection * this.byps)) * this.tileSize, startBlockX = (block.x - (xSection * this.bxps)) * this.tileSize;
         ctx.drawImage(this.tileset, block.type * this.tileSize, 0, this.tileSize, this.tileSize, startBlockX, startBlockY, this.tileSize, this.tileSize);
         var chanceTypes;
-        if (block.type === 2 /* beach */) {
+        if (block.type === TerrainType.beach) {
             chanceTypes = [
-                { c: .005, types: [12 /* rockA */, 13 /* rockB */, 14 /* rockC */, 19 /* bone */] }
+                { c: .005, types: [ItemType.rockA, ItemType.rockB, ItemType.rockC, ItemType.bone] }
             ];
             this.rollForItem(block, chanceTypes, objects);
         }
-        else if (block.type === 3 /* dirt */) {
+        else if (block.type === TerrainType.dirt) {
             chanceTypes = [
-                { c: .01, types: [12 /* rockA */, 13 /* rockB */, 14 /* rockC */, 19 /* bone */] },
-                { c: .005, types: [24 /* clay */, 20 /* log */, 21 /* stickA */, 22 /* stickB */] }
+                { c: .01, types: [ItemType.rockA, ItemType.rockB, ItemType.rockC, ItemType.bone] },
+                { c: .005, types: [ItemType.clay, ItemType.log, ItemType.stickA, ItemType.stickB] }
             ];
             this.rollForItem(block, chanceTypes, objects);
         }
-        else if (block.type === 4 /* grass */) {
+        else if (block.type === TerrainType.grass) {
             chanceTypes = [
-                { c: .005, types: [17 /* rocksA */, 18 /* rocksB */, 15 /* rockD */, 16 /* rockE */] },
-                { c: .005, types: [19 /* bone */, 24 /* clay */, 23 /* hemp */, 21 /* stickA */, 22 /* stickB */] },
-                { c: .1, types: [7 /* grassA */, 8 /* grassB */, 9 /* grassC */, 10 /* grassD */] },
-                { c: .01, types: [1 /* berry */, 2 /* bush */, 3 /* fern */, 4 /* flowerA */, 5 /* flowerB */, 6 /* mushroom */, 11 /* plant */, 20 /* log */] },
-                { c: .05, types: [0 /* tree */] }
+                { c: .005, types: [ItemType.rocksA, ItemType.rocksB, ItemType.rockD, ItemType.rockE] },
+                { c: .005, types: [ItemType.bone, ItemType.clay, ItemType.hemp, ItemType.stickA, ItemType.stickB] },
+                { c: .1, types: [ItemType.grassA, ItemType.grassB, ItemType.grassC, ItemType.grassD] },
+                { c: .01, types: [ItemType.berry, ItemType.bush, ItemType.fern, ItemType.flowerA, ItemType.flowerB, ItemType.mushroom, ItemType.plant, ItemType.log] },
+                { c: .05, types: [ItemType.tree] }
             ];
             this.rollForItem(block, chanceTypes, objects);
         }
-        else if (block.type === 5 /* rock */) {
+        else if (block.type === TerrainType.rock) {
             chanceTypes = [
-                { c: .05, types: [12 /* rockA */, 13 /* rockB */, 14 /* rockC */] }
+                { c: .05, types: [ItemType.rockA, ItemType.rockB, ItemType.rockC] }
             ];
             this.rollForItem(block, chanceTypes, objects);
         }
@@ -426,27 +462,6 @@ var World = (function () {
         //    // Draw a square using the fillRect() method and fill it with the colour specified by the fillStyle attribute
         //    ctx.fillRect(block.x * this.tileSize, block.y * this.tileSize, this.tileSize, this.tileSize);
         //}
-    };
-    World.prototype.refreshCached = function (ySection, xSection) {
-        var cachedCtx = this.cached.getContext('2d');
-        var cy = 0;
-        for (var sy = ySection - 1; sy <= ySection + 1; sy++) {
-            var cx = 0;
-            for (var sx = xSection - 1; sx <= xSection + 1; sx++) {
-                if (this.sections[sy] && this.sections[sy][sx]) {
-                    // draw section onto cached
-                    cachedCtx.drawImage(this.sections[sy][sx], 0, 0, this.pxps, this.pyps, cx * this.pxps, cy * this.pyps, this.pxps, this.pyps);
-                }
-                else {
-                    // blank section
-                    cachedCtx.fillStyle = "#000";
-                    cachedCtx.fillRect(cx * this.pxps, cy * this.pyps, this.pxps, this.pyps);
-                }
-                cx++;
-            }
-            cy++;
-        }
-        this.cachedId = ySection + "," + xSection;
     };
     World.prototype.getBlock = function (x, y) {
         var yIndex = Math.floor(y / this.tileSize), xIndex = Math.floor(x / this.tileSize);
@@ -465,6 +480,19 @@ var World = (function () {
         blocks.push(block.lowerRight);
         return blocks;
     };
+    World.prototype.getSurroundingSections = function (currSection) {
+        var sy = parseInt(currSection.split(",")[0]), sx = parseInt(currSection.split(",")[1]), sections = [];
+        sections.push(currSection);
+        sections.push(sy + "," + (sx - 1));
+        sections.push(sy + "," + (sx + 1));
+        sections.push((sy - 1) + "," + sx);
+        sections.push((sy - 1) + "," + (sx - 1));
+        sections.push((sy - 1) + "," + (sx + 1));
+        sections.push((sy + 1) + "," + sx);
+        sections.push((sy + 1) + "," + (sx - 1));
+        sections.push((sy + 1) + "," + (sx + 1));
+        return sections;
+    };
     World.prototype.getBlocksObjects = function (blocks) {
         var objects = [];
         for (var b in blocks) {
@@ -481,7 +509,7 @@ var World = (function () {
             return Math.floor(y / this.pyps) + "," + Math.floor(x / this.pxps);
         }
         else if (measurement === "b") {
-            Math.floor(y / this.byps) + "," + Math.floor(x / this.bxps);
+            return Math.floor(y / this.byps) + "," + Math.floor(x / this.bxps);
         }
     };
     World.prototype.setNearbyPointers = function (block) {
@@ -507,37 +535,37 @@ var World = (function () {
         return block.type !== undefined && block.type !== null;
     };
     World.prototype.setType = function (block, type) {
-        if (type == 0 /* ocean */) {
+        if (type == TerrainType.ocean) {
             block.bg = "#08c";
-            block.type = 0 /* ocean */;
+            block.type = TerrainType.ocean;
         }
-        else if (type == 1 /* shallow */) {
+        else if (type == TerrainType.shallow) {
             block.bg = "#0af";
-            block.type = 1 /* shallow */;
+            block.type = TerrainType.shallow;
         }
-        else if (type == 2 /* beach */) {
+        else if (type == TerrainType.beach) {
             block.bg = "#eda";
-            block.type = 2 /* beach */;
+            block.type = TerrainType.beach;
         }
-        else if (type == 4 /* grass */) {
+        else if (type == TerrainType.grass) {
             block.bg = "#8c3";
-            block.type = 4 /* grass */;
+            block.type = TerrainType.grass;
         }
-        else if (type == 3 /* dirt */) {
+        else if (type == TerrainType.dirt) {
             block.bg = "#a95";
-            block.type = 3 /* dirt */;
+            block.type = TerrainType.dirt;
         }
-        else if (type == 5 /* rock */) {
+        else if (type == TerrainType.rock) {
             block.bg = "#aaa";
-            block.type = 5 /* rock */;
+            block.type = TerrainType.rock;
         }
-        else if (type == 6 /* mountain */) {
+        else if (type == TerrainType.mountain) {
             block.bg = "#444";
-            block.type = 6 /* mountain */;
+            block.type = TerrainType.mountain;
         }
-        else if (type == 7 /* lava */) {
+        else if (type == TerrainType.lava) {
             block.bg = "#600";
-            block.type = 7 /* lava */;
+            block.type = TerrainType.lava;
         }
     };
     World.prototype.chanceType = function (block, chance) {

@@ -147,15 +147,15 @@
 
         if (controls.strength > 0) {
             if (canMove && d !== 0) {
-                if (this.stepCounter >= 40) this.stepDir = -controls.strength;
-                else if (this.stepCounter <= 0) this.stepDir = controls.strength;
+                if (this.stepCounter >= 80) this.stepDir = -1;
+                else if (this.stepCounter <= 0) this.stepDir = 1;
 
-                this.stepCounter += this.stepDir;
+                this.stepCounter += (d * this.stepDir);
 
                 //this.currAnim = (Math.abs(controls.x) > Math.abs(controls.y)) ? (controls.x > 0 ? 1 : 3) : (controls.y > 0 ? 2 : 0);
-                this.currStep = this.stepCounter < 10 ? 0 : this.stepCounter > 30 ? 2 : 1;
+                this.currStep = this.stepCounter < 20 ? 0 : this.stepCounter > 60 ? 2 : 1;
 
-                if (this.stepCounter === 40 || this.stepCounter === 0) {
+                if (this.stepCounter === 80 || this.stepCounter === 0) {
                     sound.startNote.apply(sound, note);
                 }
 
@@ -164,12 +164,14 @@
             }
         }
 
+        this.sectionId = world.getSectionId(this.x, this.y, 'p');
+
         // logging
-        var info = document.getElementById('pos');
-        info.innerHTML = "";
-        info.innerHTML += 'x: ' + this.x + '<br />';
-        info.innerHTML += 'y: ' + this.y + '<br />';
-        info.innerHTML += 'anim: ' + this.currAnim;
+        //var info = document.getElementById('pos');
+        //info.innerHTML = "";
+        //info.innerHTML += 'x: ' + this.x + '<br />';
+        //info.innerHTML += 'y: ' + this.y + '<br />';
+        //info.innerHTML += 'anim: ' + this.currAnim;
     }
 
     draw(ctx: CanvasRenderingContext2D, view: ViewPort) {

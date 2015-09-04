@@ -41,6 +41,7 @@ var Inventory = (function () {
     };
     Inventory.prototype.pickup = function (mItem) {
         var numReceived = 0, invItem = mItem.toInventoryItem(), stack = invItem.stack, tryBag;
+        // keep trying to fill up empty inventory spaces with item stack
         while (stack > 0 && tryBag !== 0) {
             tryBag = this.putInBag(invItem, stack);
             numReceived += tryBag;
@@ -57,10 +58,9 @@ var Inventory = (function () {
     Inventory.prototype.putInBag = function (item, stack) {
         var numReceived = 0;
         // maybe it's a stackable item?
-        var existingStack = _.find(this.carrying, function (i) {
-            return i && i.type == item.type && i.stack < i.maxStack;
-        });
+        var existingStack = _.find(this.carrying, function (i) { return i && i.type == item.type && i.stack < i.maxStack; });
         if (existingStack) {
+            // add to inventory stack
             while (existingStack.stack < existingStack.maxStack && stack > 0) {
                 existingStack.stack++;
                 stack--;
@@ -88,6 +88,7 @@ var Inventory = (function () {
         if (this.holding == null) {
             this.holding = item;
             this.holding.stack = 0;
+            // make sure it doesn't go over max stack
             while (this.holding.stack < this.holding.maxStack && stack > 0) {
                 this.holding.stack++;
                 stack--;
@@ -95,6 +96,7 @@ var Inventory = (function () {
             }
         }
         else if (this.holding.type === item.type) {
+            // holding an item that is same as picked up, can it stack more?
             while (this.holding.stack < this.holding.maxStack && stack > 0) {
                 this.holding.stack++;
                 stack--;
@@ -179,6 +181,7 @@ var Inventory = (function () {
                 tempCtx.font = "bold 16px Arial";
                 tempCtx.fillText(this.holding.stack.toString(), 15, 15);
             }
+            // draw carrying
             for (var i = 0; i < this.carryCapacity; i++) {
                 tempCtx.lineWidth = borderWidth;
                 tempCtx.fillStyle = fillColor;

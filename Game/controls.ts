@@ -30,7 +30,7 @@ class Controls {
         for (var i = 0; i < gp.buttons.length; i++) {
             var existingAction = _.find(this.actions, function (a) { return a.button === i; });
             if (gp.buttons[i].pressed) {
-                console.log(i);
+                //console.log(i);
                 if (!existingAction) {
                     // new action
                     this.actions.push({

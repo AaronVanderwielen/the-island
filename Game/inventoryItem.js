@@ -36,45 +36,45 @@ var InventoryItem = (function () {
         this.stack = mItem.stack;
         this.maxStack = 5;
         switch (mItem.itemType) {
-            case 28 /* axe */:
-                this.type = 19 /* axe */;
+            case ItemType.axe:
+                this.type = InventoryItemType.axe;
                 this.maxStack = 1;
                 break;
-            case 19 /* bone */:
-                this.type = 3 /* bone */;
+            case ItemType.bone:
+                this.type = InventoryItemType.bone;
                 break;
-            case 24 /* clay */:
-                this.type = 4 /* clay */;
+            case ItemType.clay:
+                this.type = InventoryItemType.clay;
                 break;
-            case 4 /* flowerA */:
-            case 5 /* flowerB */:
-            case 25 /* roots */:
-                this.type = 7 /* roots */;
+            case ItemType.flowerA:
+            case ItemType.flowerB:
+            case ItemType.roots:
+                this.type = InventoryItemType.roots;
                 break;
-            case 26 /* hammer */:
-                this.type = 18 /* hammer */;
+            case ItemType.hammer:
+                this.type = InventoryItemType.hammer;
                 this.maxStack = 1;
                 break;
-            case 23 /* hemp */:
-                this.type = 2 /* hemp */;
+            case ItemType.hemp:
+                this.type = InventoryItemType.hemp;
                 break;
-            case 27 /* knife */:
-                this.type = 17 /* knife */;
+            case ItemType.knife:
+                this.type = InventoryItemType.knife;
                 this.maxStack = 1;
                 break;
-            case 6 /* mushroom */:
-                this.type = 6 /* mushroom */;
+            case ItemType.mushroom:
+                this.type = InventoryItemType.mushroom;
                 break;
-            case 17 /* rocksA */:
-            case 18 /* rocksB */:
-                this.type = 1 /* rock */;
+            case ItemType.rocksA:
+            case ItemType.rocksB:
+                this.type = InventoryItemType.rock;
                 break;
-            case 29 /* rope */:
-                this.type = 11 /* rope */;
+            case ItemType.rope:
+                this.type = InventoryItemType.rope;
                 break;
-            case 21 /* stickA */:
-            case 22 /* stickB */:
-                this.type = 0 /* stick */;
+            case ItemType.stickA:
+            case ItemType.stickB:
+                this.type = InventoryItemType.stick;
                 break;
         }
     };

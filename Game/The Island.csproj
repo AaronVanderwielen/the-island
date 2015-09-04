@@ -26,7 +26,9 @@
     <Content Include="index.html" />
     <Content Include="util\underscore-min.js" />
     <Content Include="util\underscore-min.map" />
-    <Content Include="web.config" />
+    <Content Include="web.config">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="game.ts" />
@@ -35,17 +37,24 @@
     <TypeScriptCompile Include="inventoryItem.ts" />
     <TypeScriptCompile Include="mapItem.ts" />
     <TypeScriptCompile Include="player.ts" />
-    <TypeScriptCompile Include="util\createjs\createjs-lib.d.ts" />
-    <TypeScriptCompile Include="util\createjs\easeljs.d.ts" />
-    <TypeScriptCompile Include="util\createjs\preloadjs.d.ts" />
-    <TypeScriptCompile Include="util\createjs\soundjs.d.ts" />
-    <TypeScriptCompile Include="util\createjs\tweenjs.d.ts" />
-    <TypeScriptCompile Include="util\jquery.d.ts" />
+    <TypeScriptCompile Include="server.ts" />
+    <TypeScriptCompile Include="typescript\createjs-lib.d.ts" />
+    <TypeScriptCompile Include="typescript\easeljs.d.ts" />
+    <TypeScriptCompile Include="typescript\express.d.ts" />
+    <TypeScriptCompile Include="typescript\jquery.d.ts" />
     <TypeScriptCompile Include="sound.ts" />
     <TypeScriptCompile Include="sprite.ts" />
-    <TypeScriptCompile Include="util\underscore.d.ts" />
-    <TypeScriptCompile Include="util\webaudioapi\waa.d.ts" />
-    <TypeScriptCompile Include="util\webrtc\MediaStream.d.ts" />
+    <TypeScriptCompile Include="typescript\MediaStream.d.ts" />
+    <TypeScriptCompile Include="typescript\mime.d.ts" />
+    <TypeScriptCompile Include="typescript\mongodb.d.ts" />
+    <TypeScriptCompile Include="typescript\mongoose.d.ts" />
+    <TypeScriptCompile Include="typescript\node.d.ts" />
+    <TypeScriptCompile Include="typescript\preloadjs.d.ts" />
+    <TypeScriptCompile Include="typescript\serve-static.d.ts" />
+    <TypeScriptCompile Include="typescript\socket.io.d.ts" />
+    <TypeScriptCompile Include="typescript\soundjs.d.ts" />
+    <TypeScriptCompile Include="typescript\tweenjs.d.ts" />
+    <TypeScriptCompile Include="typescript\underscore.d.ts" />
     <TypeScriptCompile Include="world.ts" />
   </ItemGroup>
   <ItemGroup>
@@ -61,6 +70,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <RootNamespace>TypeScriptHTMLApp1</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyName>The Island</AssemblyName>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\WebApplications\Microsoft.WebApplication.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\WebApplications\Microsoft.WebApplication.targets')" />

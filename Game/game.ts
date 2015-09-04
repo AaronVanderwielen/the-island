@@ -1,7 +1,7 @@
 ﻿interface Asset {
     id: string;
     src: string;
-    value? ;
+    value?;
 }
 
 interface ViewPort {
@@ -25,9 +25,13 @@ class Game {
     resX: number;
     resY: number;
     fps: number;
+    maxFps: number;
     objects: Array<IMapObject>;
+    testArray1: number[];
+    testArray2: number[];
+    testArray3: number[];
 
-    constructor(canvas: HTMLCanvasElement, resX: number, resY: number, fps: number) {
+    constructor(canvas: HTMLCanvasElement, resX: number, resY: number, fps: number, maxFps: number) {
         this.canvas = canvas;
         this.canvas.width = resX;
         this.canvas.height = resY;
@@ -37,6 +41,7 @@ class Game {
         this.resY = resY;
 
         this.fps = fps;
+        this.maxFps = maxFps;
         this.objects = new Array();
 
         this.assets = [
@@ -44,6 +49,10 @@ class Game {
             { id: 'terrain', src: "/img/terrain.png" },
             { id: 'items', src: "/img/itemset.png" }
         ];
+
+        this.testArray1 = [];
+        this.testArray2 = [];
+        this.testArray3 = [];
     }
 
     init() {
@@ -97,13 +106,81 @@ class Game {
     start() {
         var obj = this;
 
-        window.setInterval(function () {
-            obj.stateUpdate()
-        }, 15);
+        this.monitorInterval(obj.stateUpdate.bind(obj), 15, $('#state-duration'), 'state');
+        this.monitorInterval(obj.refresh.bind(obj), (1000 / this.fps), $('#refresh-duration'), 'refresh', true);
+    }
 
-        window.setInterval(function () {
-            obj.refresh();
-        }, 1000 / obj.fps);
+    monitorInterval(f: Function, ms: number, el: JQuery, label: string, controlsFPS?: boolean) {
+        var obj = this,
+            arr: number[] = [],
+            interval,
+            monitorFunc = function () {
+                var start = new Date(),
+                    duration;
+
+                f();
+
+                duration = new Date().getTime() - start.getTime();
+                arr.push(duration);
+
+                if (arr.length > obj.fps / 2) {
+                    var ave,
+                        sum = 0;
+
+                    for (var i = 0; i < arr.length; i++) {
+                        sum += arr[i];
+                    }
+
+                    ave = (sum / arr.length).toFixed(2);
+
+                    el.html(label + ": " + ave + "ms");
+                    arr = [];
+
+                    if (controlsFPS) {
+                        if (ave > ms) {
+                            ms++;
+                            clearInterval(interval);
+                            obj.fps = Math.round(1000 / ms);
+                            $('#fps').html('fps: ' + obj.fps);
+                            interval = setInterval(monitorFunc, ms);
+                        }
+                        else if ((ave < (ms - 3)) && (Math.round(1000 / ms) < obj.maxFps)) {
+                            ms--;
+                            clearInterval(interval);
+                            obj.fps = Math.round(1000 / ms);
+                            $('#fps').html('fps: ' + obj.fps);
+                            interval = setInterval(monitorFunc, ms);
+                        }
+                    }
+                }
+            };
+
+        interval = setInterval(monitorFunc, ms);
+    }
+
+    monitorFunction(f: Function, arr: number[], el: JQuery, label: string, ...params) {
+        var obj = this,
+            start = new Date(),
+            duration;
+
+        f.apply(this, params);
+
+        duration = new Date().getTime() - start.getTime();
+        arr.push(duration);
+
+        if (arr.length > obj.fps / 2) {
+            var ave,
+                sum = 0;
+
+            for (var i = 0; i < arr.length; i++) {
+                sum += arr[i];
+            }
+
+            ave = (sum / arr.length).toFixed(2);
+
+            el.html(label + ": " + ave + "ms");
+            arr = [];
+        }
     }
 
     stateUpdate() {
@@ -112,23 +189,40 @@ class Game {
 
     refresh() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.moveViewCenter(this.player.sprite);
-        this.drawMapObjects();
-        this.player.inventory.draw(this.canvas);
+
+        //this.moveViewCenter(this.player.sprite);
+        this.monitorFunction(this.moveViewCenter.bind(this), this.testArray1, $('#draw-view-duration'), 'move view', this.player.sprite);
+
+        //this.drawMapObjects.bind(this)
+        this.monitorFunction(this.drawMapObjects.bind(this), this.testArray1, $('#draw-map-objects-duration'), 'map objects');
+
+        //this.player.inventory.draw(this.canvas);
+        //this.monitorFunction(this.player.inventory.draw.bind(this.player.inventory), this.testArray2, $('#draw-inventory-duration'), 'inventory', this.canvas);
     }
 
     drawMapObjects() {
-        this.objects = _.sortBy(this.objects, function (o) {
-            var sortBy = o.z.toString();
+        var currSection = this.player.sprite.sectionId;
+        if (currSection) {
+            // only draw objects that are around current player's section
+            var acceptSections = this.world.getSurroundingSections(currSection),
+                drawObjects = _.filter(this.objects, function (o: IMapObject) {
+                    return acceptSections.indexOf(o.sectionId) > -1;
+                });
 
-            if (o.mapObjectType == MapObjectType.sprite) sortBy += (o.passing ? "0" : "2");
-            else sortBy += "1";
+            // sort by z index
+            drawObjects = _.sortBy(drawObjects, function (o: IMapObject) {
+                var sortBy = o.z.toString();
 
-            return sortBy;
-        });
+                if (o.mapObjectType == MapObjectType.sprite) sortBy += (o.passing ? "0" : "2");
+                else sortBy += "1";
 
-        for (var o in this.objects) {
-            this.objects[o].draw(this.ctx, this.view);
+                return sortBy;
+            });
+
+            // draw
+            for (var o in drawObjects) {
+                drawObjects[o].draw(this.ctx, this.view);
+            }
         }
     }
 
@@ -136,23 +230,15 @@ class Game {
         var ctx = this.canvas.getContext("2d"),
             ySection = Math.floor(this.player.sprite.y / this.world.pyps),
             xSection = Math.floor(this.player.sprite.x / this.world.pxps),
-            cachedId = ySection + "," + xSection,
+            currSectionId = ySection + "," + xSection,
             cachedStartY = this.view.startY - ((ySection - 1) * this.world.pyps),
             cachedStartX = this.view.startX - ((xSection - 1) * this.world.pxps);
 
         // logging
         var info = document.getElementById('view');
-        info.innerHTML = "";
-        info.innerHTML += 'xSection: ' + xSection + '<br />';
-        info.innerHTML += 'ySection: ' + ySection + '<br />';
+        info.innerHTML = currSectionId;
 
-        if (cachedId !== this.world.cachedId) {
-            // need to render a new 3x3 cached canvas
-            console.log('refreshing cached canvas');
-            this.world.refreshCached(ySection, xSection);
-        }
-
-        ctx.drawImage(this.world.cached, cachedStartX, cachedStartY, this.resX, this.resY, 0, 0, this.resX, this.resY);
+        ctx.drawImage(this.world.worldCache[currSectionId], cachedStartX, cachedStartY, this.resX, this.resY, 0, 0, this.resX, this.resY);
     }
 
     moveViewCenter(userSprite: Sprite) {
@@ -175,7 +261,7 @@ class Game {
 $(function () {
     if ("getGamepads" in navigator) {
         var canvas = <HTMLCanvasElement>$('canvas')[0],
-            game = new Game(canvas, window.innerWidth, window.innerHeight, 60);
+            game = new Game(canvas, window.innerWidth, window.innerHeight, 30, 60);
 
         game.init();
     }

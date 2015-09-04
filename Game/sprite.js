@@ -2,7 +2,7 @@ var Sprite = (function () {
     function Sprite(asset) {
         var sprite = this;
         sprite.id = guid();
-        sprite.mapObjectType = 1 /* sprite */;
+        sprite.mapObjectType = MapObjectType.sprite;
         sprite.height = 96;
         sprite.width = 72;
         sprite.set = null;
@@ -26,7 +26,7 @@ var Sprite = (function () {
             [null, null, null],
             [null, null, null],
             [null, null, null],
-            [null, null, null]
+            [null, null, null] // left
         ];
         for (var y = 0; y < 4; y++) {
             for (var x = 0; x < 3; x++) {
@@ -47,11 +47,11 @@ var Sprite = (function () {
     Sprite.prototype.move = function (controls, world, sound) {
         var note = [50, .1, .4, 'triangle'];
         var d = Math.ceil(((controls.sprinting && !controls.looking ? controls.strength * 2 : controls.strength) * 2) * this.slow), nextY = Math.round(this.y + (controls.y * d)), nextX = Math.round(this.x + (controls.x * d)), yOffset = Math.round(-(this.height * (1 - this.yAdjust))), nextBlock = world.getBlock(nextX, nextY + yOffset), nearbyBlocks = world.getSurroundingBlocks(nextX, nextY + yOffset), nearbyObjects = world.getBlocksObjects(nearbyBlocks), canMove = true;
-        if (nextBlock.type === 1 /* shallow */) {
+        if (nextBlock.type === TerrainType.shallow) {
             this.slow = this.yAdjust > .75 ? .75 : this.yAdjust > .65 ? .5 : .25;
             note = [43.65, .3, .4, 'sawtooth'];
         }
-        else if (nextBlock.type === 0 /* ocean */ || nextBlock.type === 6 /* mountain */) {
+        else if (nextBlock.type === TerrainType.ocean || nextBlock.type === TerrainType.mountain) {
             canMove = false;
         }
         else {
@@ -91,32 +91,33 @@ var Sprite = (function () {
         }
         if (controls.strength > 0) {
             if (canMove && d !== 0) {
-                if (this.stepCounter >= 40)
-                    this.stepDir = -controls.strength;
+                if (this.stepCounter >= 80)
+                    this.stepDir = -1;
                 else if (this.stepCounter <= 0)
-                    this.stepDir = controls.strength;
-                this.stepCounter += this.stepDir;
+                    this.stepDir = 1;
+                this.stepCounter += (d * this.stepDir);
                 //this.currAnim = (Math.abs(controls.x) > Math.abs(controls.y)) ? (controls.x > 0 ? 1 : 3) : (controls.y > 0 ? 2 : 0);
-                this.currStep = this.stepCounter < 10 ? 0 : this.stepCounter > 30 ? 2 : 1;
-                if (this.stepCounter === 40 || this.stepCounter === 0) {
+                this.currStep = this.stepCounter < 20 ? 0 : this.stepCounter > 60 ? 2 : 1;
+                if (this.stepCounter === 80 || this.stepCounter === 0) {
                     sound.startNote.apply(sound, note);
                 }
                 this.x = nextX;
                 this.y = nextY;
             }
         }
+        this.sectionId = world.getSectionId(this.x, this.y, 'p');
         // logging
-        var info = document.getElementById('pos');
-        info.innerHTML = "";
-        info.innerHTML += 'x: ' + this.x + '<br />';
-        info.innerHTML += 'y: ' + this.y + '<br />';
-        info.innerHTML += 'anim: ' + this.currAnim;
+        //var info = document.getElementById('pos');
+        //info.innerHTML = "";
+        //info.innerHTML += 'x: ' + this.x + '<br />';
+        //info.innerHTML += 'y: ' + this.y + '<br />';
+        //info.innerHTML += 'anim: ' + this.currAnim;
     };
     Sprite.prototype.draw = function (ctx, view) {
         var offsetX = this.x - (this.width / 2.2), offsetY = this.y - (.9 * this.height), centeredX = offsetX - view.startX, centeredY = offsetY - view.startY;
         this.img = this.set[this.currAnim][this.currStep];
-        if (this.on.type === 1 /* shallow */ || this.on.type === 0 /* ocean */) {
-            var bordersLand = this.on.borders([2 /* beach */, 3 /* dirt */, 4 /* grass */, 5 /* rock */]), bordersOcean = this.on.borders([0 /* ocean */]);
+        if (this.on.type === TerrainType.shallow || this.on.type === TerrainType.ocean) {
+            var bordersLand = this.on.borders([TerrainType.beach, TerrainType.dirt, TerrainType.grass, TerrainType.rock]), bordersOcean = this.on.borders([TerrainType.ocean]);
             if ((bordersLand && bordersOcean) || (!bordersLand && !bordersOcean)) {
                 this.yAdjust = .75;
                 ctx.drawImage(this.set[this.currAnim][this.currStep], 0, 0, this.width, this.height * this.yAdjust, centeredX, centeredY, this.width, this.height * this.yAdjust);

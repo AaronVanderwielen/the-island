@@ -43,47 +43,71 @@ var MapItem = (function () {
         }
         else {
             this.id = guid();
-            this.mapObjectType = 0 /* item */;
+            this.mapObjectType = MapObjectType.item;
             this.getItem(itemset, type);
             this.passing = false;
         }
     }
     MapItem.prototype.createFromInventoryItem = function (itemset, invItem, stack) {
         this.id = guid();
-        this.mapObjectType = 0 /* item */;
+        this.mapObjectType = MapObjectType.item;
         switch (invItem.type) {
-            case 19 /* axe */:
-                this.getItem(itemset, 28 /* axe */);
+            case InventoryItemType.axe:
+                this.getItem(itemset, ItemType.axe);
                 break;
-            case 3 /* bone */:
-                this.getItem(itemset, 19 /* bone */);
+            //case InventoryItemType.berries:
+            //    this.itemType = ItemType.berry;
+            //    break;
+            case InventoryItemType.bone:
+                this.getItem(itemset, ItemType.bone);
                 break;
-            case 4 /* clay */:
-                this.getItem(itemset, 24 /* clay */);
+            //case InventoryItemType.brick:
+            //    this.itemType = ItemType.brick;
+            //    break;
+            //case InventoryItemType.canvas:
+            //    this.itemType = ItemType.axe;
+            //    break;
+            case InventoryItemType.clay:
+                this.getItem(itemset, ItemType.clay);
                 break;
-            case 18 /* hammer */:
-                this.getItem(itemset, 26 /* hammer */);
+            case InventoryItemType.hammer:
+                this.getItem(itemset, ItemType.hammer);
                 break;
-            case 2 /* hemp */:
-                this.getItem(itemset, 23 /* hemp */);
+            case InventoryItemType.hemp:
+                this.getItem(itemset, ItemType.hemp);
                 break;
-            case 17 /* knife */:
-                this.getItem(itemset, 27 /* knife */);
+            case InventoryItemType.knife:
+                this.getItem(itemset, ItemType.knife);
                 break;
-            case 6 /* mushroom */:
-                this.getItem(itemset, 6 /* mushroom */);
+            //case InventoryItemType.lumber:
+            //    this.itemType = ItemType.;
+            //    break;
+            //case InventoryItemType.meat:
+            //    this.itemType = ItemType.mea;
+            //    break;
+            case InventoryItemType.mushroom:
+                this.getItem(itemset, ItemType.mushroom);
                 break;
-            case 1 /* rock */:
-                this.getItem(itemset, 17 /* rocksA */);
+            //case InventoryItemType.plank:
+            //    this.itemType = ItemType.axe;
+            //    break;
+            case InventoryItemType.rock:
+                this.getItem(itemset, ItemType.rocksA);
                 break;
-            case 7 /* roots */:
-                this.getItem(itemset, 25 /* roots */);
+            case InventoryItemType.roots:
+                this.getItem(itemset, ItemType.roots);
                 break;
-            case 11 /* rope */:
-                this.getItem(itemset, 29 /* rope */);
+            case InventoryItemType.rope:
+                this.getItem(itemset, ItemType.rope);
                 break;
-            case 0 /* stick */:
-                this.getItem(itemset, 21 /* stickA */);
+            //case InventoryItemType.sand:
+            //    this.itemType = ItemType.sa;
+            //    break;
+            //case InventoryItemType.skin:
+            //    this.itemType = ItemType.sk;
+            //    break;
+            case InventoryItemType.stick:
+                this.getItem(itemset, ItemType.stickA);
                 break;
         }
         this.stack = stack ? stack : invItem.stack;
@@ -119,160 +143,160 @@ var MapItem = (function () {
             stack: 1
         };
         switch (type) {
-            case 28 /* axe */:
+            case ItemType.axe:
                 data.x = 2;
                 data.y = 0;
                 data.canPickup = true;
                 break;
-            case 1 /* berry */:
+            case ItemType.berry:
                 data.x = 11;
                 data.y = 0;
                 data.z = 1;
                 data.multiplier = 2;
                 break;
-            case 19 /* bone */:
+            case ItemType.bone:
                 data.x = 8;
                 data.y = 5;
                 data.canPickup = true;
                 break;
-            case 2 /* bush */:
+            case ItemType.bush:
                 data.x = 10;
                 data.y = 0;
                 data.z = 1;
                 data.multiplier = 2;
                 break;
-            case 24 /* clay */:
+            case ItemType.clay:
                 data.x = 5;
                 data.y = 5;
                 data.z = 1;
                 data.canPickup = true;
                 break;
-            case 3 /* fern */:
+            case ItemType.fern:
                 data.x = 1;
                 data.y = 5;
                 data.z = 1;
                 data.multiplier = 2;
                 break;
-            case 4 /* flowerA */:
+            case ItemType.flowerA:
                 data.x = 0;
                 data.y = 5;
                 data.canPickup = true;
                 break;
-            case 5 /* flowerB */:
+            case ItemType.flowerB:
                 data.x = 0;
                 data.y = 6;
                 data.canPickup = true;
                 break;
-            case 7 /* grassA */:
+            case ItemType.grassA:
                 data.x = 4;
                 data.y = 6;
                 break;
-            case 8 /* grassB */:
+            case ItemType.grassB:
                 data.x = 4;
                 data.y = 7;
                 break;
-            case 9 /* grassC */:
+            case ItemType.grassC:
                 data.x = 5;
                 data.y = 7;
                 break;
-            case 10 /* grassD */:
+            case ItemType.grassD:
                 data.x = 5;
                 data.y = 6;
                 break;
-            case 26 /* hammer */:
+            case ItemType.hammer:
                 data.x = 0;
                 data.y = 0;
                 break;
-            case 23 /* hemp */:
+            case ItemType.hemp:
                 data.x = 9;
                 data.y = 1;
                 data.z = 1;
                 data.canPickup = true;
                 break;
-            case 27 /* knife */:
+            case ItemType.knife:
                 data.x = 1;
                 data.y = 0;
                 data.canPickup = true;
                 break;
-            case 20 /* log */:
+            case ItemType.log:
                 data.x = 7;
                 data.y = 5;
                 data.z = 1;
                 data.multiplier = 2;
                 break;
-            case 6 /* mushroom */:
+            case ItemType.mushroom:
                 data.x = 4;
                 data.y = 5;
                 data.canPickup = true;
                 break;
-            case 11 /* plant */:
+            case ItemType.plant:
                 data.x = 8;
                 data.y = 1;
                 data.multiplier = 2;
                 break;
-            case 12 /* rockA */:
+            case ItemType.rockA:
                 data.x = 8;
                 data.y = 3;
                 data.z = 1;
                 data.multiplier = 2;
                 break;
-            case 13 /* rockB */:
+            case ItemType.rockB:
                 data.x = 9;
                 data.y = 3;
                 data.z = 1;
                 data.multiplier = 2;
                 break;
-            case 14 /* rockC */:
+            case ItemType.rockC:
                 data.x = 10;
                 data.y = 3;
                 data.z = 1;
                 data.multiplier = 2;
                 break;
-            case 15 /* rockD */:
+            case ItemType.rockD:
                 data.x = 1;
                 data.y = 7;
                 data.z = 1;
                 data.multiplier = 2;
                 break;
-            case 16 /* rockE */:
+            case ItemType.rockE:
                 data.x = 3;
                 data.y = 7;
                 data.z = 1;
                 data.multiplier = 2;
                 break;
-            case 17 /* rocksA */:
+            case ItemType.rocksA:
                 data.x = 0;
                 data.y = 7;
                 data.canPickup = true;
                 data.stack = 3;
                 break;
-            case 18 /* rocksB */:
+            case ItemType.rocksB:
                 data.x = 2;
                 data.y = 7;
                 data.canPickup = true;
                 data.stack = 3;
                 break;
-            case 25 /* roots */:
+            case ItemType.roots:
                 data.x = 1;
                 data.y = 6;
                 data.canPickup = true;
                 break;
-            case 29 /* rope */:
+            case ItemType.rope:
                 data.x = 5;
                 data.y = 0;
                 data.canPickup = true;
                 break;
-            case 21 /* stickA */:
+            case ItemType.stickA:
                 data.x = 6;
                 data.y = 0;
                 data.canPickup = true;
                 break;
-            case 22 /* stickB */:
+            case ItemType.stickB:
                 data.x = 7;
                 data.y = 0;
                 data.canPickup = true;
                 break;
-            case 0 /* tree */:
+            case ItemType.tree:
                 data.x = 6;
                 data.y = 6;
                 data.z = 1;

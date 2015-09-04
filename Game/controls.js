@@ -11,11 +11,9 @@ var Controls = (function () {
     Controls.prototype.report = function (sprite) {
         var gp = navigator['getGamepads']()[0];
         for (var i = 0; i < gp.buttons.length; i++) {
-            var existingAction = _.find(this.actions, function (a) {
-                return a.button === i;
-            });
+            var existingAction = _.find(this.actions, function (a) { return a.button === i; });
             if (gp.buttons[i].pressed) {
-                console.log(i);
+                //console.log(i);
                 if (!existingAction) {
                     // new action
                     this.actions.push({
@@ -28,9 +26,7 @@ var Controls = (function () {
                 // no longer holding button
                 if (existingAction) {
                     // remove from actions
-                    this.actions = _.reject(this.actions, function (a) {
-                        return a.button === i;
-                    });
+                    this.actions = _.reject(this.actions, function (a) { return a.button === i; });
                 }
             }
         }

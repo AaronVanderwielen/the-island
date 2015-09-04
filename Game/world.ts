@@ -1,4 +1,12 @@
-﻿interface Section {
+﻿interface HTMLCanvasElement {
+    ready: boolean;
+}
+
+interface WorldCache {
+    [sectionId: string]: HTMLCanvasElement;
+}
+
+interface Section {
     x: number;
     y: number;
     canvas: HTMLCanvasElement;
@@ -7,7 +15,7 @@
 interface Block {
     x: number;
     y: number;
-    sectionId: string;
+    sectionId?: string;
     type?: TerrainType;
     above?: Block;
     right?: Block;
@@ -46,8 +54,7 @@ class World {
     bxps: number;
     pyps: number;
     pxps: number;
-    cached: HTMLCanvasElement;
-    cachedId: string;
+    worldCache: WorldCache;
     sectionsX: number;
     sectionsY: number;
     numX: number;
@@ -76,31 +83,22 @@ class World {
 
         // create cached canvas--will be used to hold 3 x 3 sections, updated on section change
         // this is where the viewport is extracted from
-        this.cached = document.createElement('canvas');
-        this.cached.width = this.pxps * 3;
-        this.cached.height = this.pyps * 3;
-        var ctx = this.cached.getContext('2d');
-
-        // create section canvases
-        this.sections = [];
-        for (var sy = 0; sy < this.sectionsY; sy++) {
-            for (var sx = 0; sx < this.sectionsX; sx++) {
-                if (sx === 0) {
-                    this.sections[sy] = [];
-                }
-
-                this.sections[sy][sx] = document.createElement('canvas');
-                this.sections[sy][sx].width = (this.numX / this.sectionsX) * tileSize;
-                this.sections[sy][sx].height = (this.numY / this.sectionsX) * tileSize;
-            }
-        }
+        this.worldCache = {};
 
         this.tileset = tileset;
         this.itemset = itemset;
 
+        // initialize canvases
+        this.sections = [];
+        this.createSectionCanvases();
+
+        // world
         this.initGrid();
         this.build();
-        this.render(objects);
+        this.applyTerrain(objects);
+
+        // cache
+        this.cacheSections();
     }
 
     initGrid() {
@@ -109,11 +107,9 @@ class World {
         // initialize empty blocks in grid
         for (var y = 0; y < this.numY; y++) {
             for (var x = 0; x < this.numX; x++) {
-                var sectionId = this.getSectionId(y, x, 'b'),
-                    block = {
+                    var block: Block = {
                         x: x,
                         y: y,
-                        sectionId: sectionId,
                         objects: [],
                         borders: function (terrain: Array<TerrainType>) {
                             return terrain.indexOf(this.above.type) != -1 || terrain.indexOf(this.right.type) != -1 || terrain.indexOf(this.below.type) != -1 || terrain.indexOf(this.left.type) != -1 ||
@@ -135,6 +131,59 @@ class World {
             for (var k in row) {
                 var b = row[k];
                 this.setNearbyPointers(b);
+            }
+        }
+    }
+
+    createSectionCanvases() {
+        for (var sy = 0; sy < this.sectionsY; sy++) {
+            for (var sx = 0; sx < this.sectionsX; sx++) {
+                if (sx === 0) {
+                    this.sections[sy] = [];
+                }
+
+                this.sections[sy][sx] = document.createElement('canvas');
+                this.sections[sy][sx].width = (this.numX / this.sectionsX) * this.tileSize;
+                this.sections[sy][sx].height = (this.numY / this.sectionsX) * this.tileSize;
+
+                var newCanvas = document.createElement('canvas'),
+                    sectionId = sy + "," + sx;
+
+                newCanvas.width = this.pxps * 3;
+                newCanvas.height = this.pyps * 3;
+                newCanvas.ready = false;
+                this.worldCache[sectionId] = newCanvas;
+            }
+        }
+    }
+
+    cacheSections() {
+        for (var ySection = 0; ySection < this.sectionsY; ySection++) {
+            for (var xSection = 0; xSection < this.sectionsX; xSection++) {
+                var sectionId = ySection + "," + xSection,
+                    c = this.worldCache[sectionId],
+                    ctx = c.getContext('2d'),
+                    cy = 0;
+
+                // draw a 3 section x 3 section block
+                for (var sy = ySection - 1; sy <= ySection + 1; sy++) {
+                    var cx = 0;
+                    for (var sx = xSection - 1; sx <= xSection + 1; sx++) {
+                        if (this.sections[sy] && this.sections[sy][sx]) {
+                            // draw section onto cached
+                            ctx.drawImage(this.sections[sy][sx], 0, 0, this.pxps, this.pyps, cx * this.pxps, cy * this.pyps, this.pxps, this.pyps);
+                        }
+                        else {
+                            // blank section
+                            ctx.fillStyle = "#000";
+                            ctx.fillRect(cx * this.pxps, cy * this.pyps, this.pxps, this.pyps)
+                        }
+                        cx++;
+                    }
+                    cy++;
+                }
+                c.ready = true;
+                this.worldCache[sectionId] = c;
             }
         }
     }
@@ -504,7 +553,7 @@ class World {
         }
     }
 
-    render(objects: Array<IMapObject>) {
+    applyTerrain(objects: Array<IMapObject>) {
         for (var sy = 0; sy < this.sectionsY; sy++) {
             for (var sx = 0; sx < this.sectionsX; sx++) {
                 var ctx = this.sections[sy][sx].getContext("2d"),
@@ -518,7 +567,8 @@ class World {
 
                     for (var x = startX; x < endX; x++) {
                         var block = row[x];
-                        this.renderBlock(block, sy, sx, ctx, objects);
+                        block.sectionId = sy + "," + sx;
+                        this.blockInitialization(block, sy, sx, ctx, objects);
                     }
                 }
             }
@@ -531,7 +581,7 @@ class World {
         //}
     }
 
-    renderBlock(block: Block, ySection: number, xSection: number, ctx: CanvasRenderingContext2D, objects: Array<IMapObject>) {
+    blockInitialization(block: Block, ySection: number, xSection: number, ctx: CanvasRenderingContext2D, objects: Array<IMapObject>) {
         var startBlockY = (block.y - (ySection * this.byps)) * this.tileSize,
             startBlockX = (block.x - (xSection * this.bxps)) * this.tileSize;
 
@@ -581,28 +631,6 @@ class World {
         //}
     }
 
-    refreshCached(ySection: number, xSection: number) {
-        var cachedCtx = this.cached.getContext('2d');
-        var cy = 0;
-        for (var sy = ySection - 1; sy <= ySection + 1; sy++) {
-            var cx = 0;
-            for (var sx = xSection - 1; sx <= xSection + 1; sx++) {
-                if (this.sections[sy] && this.sections[sy][sx]) {
-                    // draw section onto cached
-                    cachedCtx.drawImage(this.sections[sy][sx], 0, 0, this.pxps, this.pyps, cx * this.pxps, cy * this.pyps, this.pxps, this.pyps);
-                }
-                else {
-                    // blank section
-                    cachedCtx.fillStyle = "#000";
-                    cachedCtx.fillRect(cx * this.pxps, cy * this.pyps, this.pxps, this.pyps)
-                }
-                cx++;
-            }
-            cy++;
-        }
-        this.cachedId = ySection + "," + xSection;
-    }
-
     getBlock(x: number, y: number) {
         var yIndex = Math.floor(y / this.tileSize),
             xIndex = Math.floor(x / this.tileSize);
@@ -627,6 +655,24 @@ class World {
         return blocks;
     }
 
+    getSurroundingSections(currSection: string) {
+        var sy = parseInt(currSection.split(",")[0]),
+            sx = parseInt(currSection.split(",")[1]),
+            sections = [];
+
+        sections.push(currSection);
+        sections.push(sy + "," + (sx - 1));
+        sections.push(sy + "," + (sx + 1));
+        sections.push((sy - 1) + "," + sx);
+        sections.push((sy - 1) + "," + (sx - 1));
+        sections.push((sy - 1) + "," + (sx + 1));
+        sections.push((sy + 1) + "," + sx);
+        sections.push((sy + 1) + "," + (sx - 1));
+        sections.push((sy + 1) + "," + (sx + 1));
+
+        return sections;
+    }
+
     getBlocksObjects(blocks: Array<Block>) {
         var objects: Array<IMapObject> = [];
 
@@ -646,7 +692,7 @@ class World {
             return Math.floor(y / this.pyps) + "," + Math.floor(x / this.pxps);
         }
         else if (measurement === "b") {
-            Math.floor(y / this.byps) + "," + Math.floor(x / this.bxps)
+            return Math.floor(y / this.byps) + "," + Math.floor(x / this.bxps)
         }
     }
 

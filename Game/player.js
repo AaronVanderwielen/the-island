@@ -11,6 +11,7 @@ var Player = (function () {
         for (var a in this.controls.actions) {
             var action = this.controls.actions[a];
             if (!action.recorded) {
+                // new action to process
                 switch (action.button) {
                     case 0:
                         if (this.inventory.active) {
@@ -47,8 +48,10 @@ var Player = (function () {
                     case 5:
                         break;
                     case 6:
+                        // look around-- right thumb takes over anim
                         break;
                     case 7:
+                        // sprint
                         break;
                     case 8:
                         break;
