@@ -1,0 +1,26 @@
+﻿body {
+    font-family: 'Segoe UI', sans-serif;
+}
+
+span {
+    font-style: italic;
+}
+
+html, body, canvas {
+    margin: 0;
+    padding: 0;
+}
+
+#info {
+    position: absolute;
+    z-index: 50;
+    top: 10px;
+    left: 10px;
+}
+
+.load-step {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    color: white;
+}

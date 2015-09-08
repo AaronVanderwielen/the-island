@@ -1,5 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|AnyCPU">
       <Configuration>Debug</Configuration>
@@ -38,7 +39,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>1b0cebcf-0a73-4714-9b51-83f043ea5ae7</ProjectGuid>
+    <ProjectGuid>01359952-f3b4-4e0f-950b-be439b73bcb5</ProjectGuid>
+    <TypeScriptToolsVersion>1.5</TypeScriptToolsVersion>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup Condition="'$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0'">
@@ -53,14 +55,13 @@
     <TargetPlatformMinVersion>10.0.10240.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>$(VersionNumberMajor).$(VersionNumberMinor)</MinimumVisualStudioVersion>
     <DefaultLanguage>en-US</DefaultLanguage>
-    
     <PackageCertificateKeyFile>App_TemporaryKey.pfx</PackageCertificateKeyFile>
-    
   </PropertyGroup>
   <ItemGroup>
     <AppxManifest Include="package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
+    <Content Include="css\app.css" />
     <Content Include="default.html" />
     <Content Include="images\LockScreenLogo.scale-200.png" />
     <Content Include="images\SplashScreen.scale-200.png" />
@@ -69,19 +70,57 @@
     <Content Include="images\Square44x44Logo.targetsize-24_altform-unplated.png" />
     <Content Include="images\StoreLogo.png" />
     <Content Include="images\Wide310x150Logo.scale-200.png" />
+    <Content Include="img\char.png" />
+    <Content Include="img\itemset.png" />
+    <Content Include="img\itemset.xcf" />
+    <Content Include="img\terrain.png" />
+    <Content Include="img\tiles.xcf" />
+    <Content Include="img\tilesetA.png" />
+    <Content Include="img\tilesetA.xcf" />
     <Content Include="js\default.js" />
-    <Content Include="css\default.css" />
+    <Content Include="util\createjs-2015.05.21.min.js" />
+    <Content Include="util\jquery.min.js" />
+    <Content Include="util\underscore-min.js" />
+    <Content Include="util\underscore-min.map" />
     <Content Include="WinJS\css\ui-dark.css" />
     <Content Include="WinJS\css\ui-light.css" />
     <Content Include="WinJS\fonts\Symbols.ttf" />
     <Content Include="WinJS\js\en-US\ui.strings.js" />
     <Content Include="WinJS\js\base.js" />
     <Content Include="WinJS\js\ui.js" />
-    
     <None Include="App_TemporaryKey.pfx" />
-    
+    <TypeScriptCompile Include="js\controls.ts" />
+    <TypeScriptCompile Include="js\game.ts" />
+    <TypeScriptCompile Include="js\inventory.ts" />
+    <TypeScriptCompile Include="js\inventoryItem.ts" />
+    <TypeScriptCompile Include="js\mapItem.ts" />
+    <TypeScriptCompile Include="js\player.ts" />
+    <TypeScriptCompile Include="js\sound.ts" />
+    <TypeScriptCompile Include="js\sprite.ts" />
+    <TypeScriptCompile Include="js\world.ts" />
+    <TypeScriptCompile Include="server\server.ts" />
+    <TypeScriptCompile Include="typescript\createjs-lib.d.ts" />
+    <TypeScriptCompile Include="typescript\easeljs.d.ts" />
+    <TypeScriptCompile Include="typescript\express.d.ts" />
+    <TypeScriptCompile Include="typescript\jquery.d.ts" />
+    <TypeScriptCompile Include="typescript\MediaStream.d.ts" />
+    <TypeScriptCompile Include="typescript\mime.d.ts" />
+    <TypeScriptCompile Include="typescript\mongodb.d.ts" />
+    <TypeScriptCompile Include="typescript\mongoose.d.ts" />
+    <TypeScriptCompile Include="typescript\node.d.ts" />
+    <TypeScriptCompile Include="typescript\preloadjs.d.ts" />
+    <TypeScriptCompile Include="typescript\serve-static.d.ts" />
+    <TypeScriptCompile Include="typescript\socket.io.d.ts" />
+    <TypeScriptCompile Include="typescript\soundjs.d.ts" />
+    <TypeScriptCompile Include="typescript\tweenjs.d.ts" />
+    <TypeScriptCompile Include="typescript\underscore.d.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{4a0dddb5-7a95-4fbf-97cc-616d07737a77}" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.jsproj.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.jsproj.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below then uncomment
        that target and the DisableFastUpToDateCheck PropertyGroup. 
        Other similar extension points exist, see Microsoft.Common.targets.

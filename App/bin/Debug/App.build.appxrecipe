@@ -1,0 +1,168 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Machine>AARON-PC</Machine>
+    <WindowsUser>Aaron</WindowsUser>
+    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
+    <TargetOsVersion>10.0</TargetOsVersion>
+    <TargetOsDescription>Windows 10.0</TargetOsDescription>
+    <SolutionConfiguration>Debug|AnyCPU</SolutionConfiguration>
+    <PackageArchitecture>neutral</PackageArchitecture>
+    <PackageIdentityName>01359952-f3b4-4e0f-950b-be439b73bcb5</PackageIdentityName>
+    <IntermediateOutputPath>C:\Users\Aaron\Projects\GitHub\battleroyale\App\bld\Debug\</IntermediateOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <AppXManifest Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\bin\Debug\AppxManifest.xml">
+      <PackagePath>AppxManifest.xml</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppXManifest>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\css\app.css">
+      <PackagePath>css\app.css</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\WinJS\css\ui-dark.css">
+      <PackagePath>WinJS\css\ui-dark.css</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\WinJS\css\ui-light.css">
+      <PackagePath>WinJS\css\ui-light.css</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\default.html">
+      <PackagePath>default.html</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\images\LockScreenLogo.scale-200.png">
+      <PackagePath>images\LockScreenLogo.scale-200.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\images\SplashScreen.scale-200.png">
+      <PackagePath>images\SplashScreen.scale-200.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\images\Square150x150Logo.scale-200.png">
+      <PackagePath>images\Square150x150Logo.scale-200.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\images\Square44x44Logo.scale-200.png">
+      <PackagePath>images\Square44x44Logo.scale-200.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\images\Square44x44Logo.targetsize-24_altform-unplated.png">
+      <PackagePath>images\Square44x44Logo.targetsize-24_altform-unplated.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\images\StoreLogo.png">
+      <PackagePath>images\StoreLogo.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\images\Wide310x150Logo.scale-200.png">
+      <PackagePath>images\Wide310x150Logo.scale-200.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\img\char.png">
+      <PackagePath>img\char.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\img\itemset.png">
+      <PackagePath>img\itemset.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\img\terrain.png">
+      <PackagePath>img\terrain.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\img\tilesetA.png">
+      <PackagePath>img\tilesetA.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\img\itemset.xcf">
+      <PackagePath>img\itemset.xcf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\img\tiles.xcf">
+      <PackagePath>img\tiles.xcf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\img\tilesetA.xcf">
+      <PackagePath>img\tilesetA.xcf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\default.js">
+      <PackagePath>js\default.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\createjs-2015.05.21.min.js">
+      <PackagePath>util\createjs-2015.05.21.min.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\jquery.min.js">
+      <PackagePath>util\jquery.min.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\underscore-min.js">
+      <PackagePath>util\underscore-min.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\WinJS\js\en-US\ui.strings.js">
+      <PackagePath>WinJS\js\en-US\ui.strings.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\WinJS\js\base.js">
+      <PackagePath>WinJS\js\base.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\WinJS\js\ui.js">
+      <PackagePath>WinJS\js\ui.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\controls.js">
+      <PackagePath>js\controls.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game.js">
+      <PackagePath>js\game.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\inventory.js">
+      <PackagePath>js\inventory.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\inventoryItem.js">
+      <PackagePath>js\inventoryItem.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\mapItem.js">
+      <PackagePath>js\mapItem.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\player.js">
+      <PackagePath>js\player.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\sound.js">
+      <PackagePath>js\sound.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\sprite.js">
+      <PackagePath>js\sprite.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\world.js">
+      <PackagePath>js\world.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\server\server.js">
+      <PackagePath>server\server.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\underscore-min.map">
+      <PackagePath>util\underscore-min.map</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\controls.js.map">
+      <PackagePath>js\controls.js.map</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game.js.map">
+      <PackagePath>js\game.js.map</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\inventory.js.map">
+      <PackagePath>js\inventory.js.map</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\inventoryItem.js.map">
+      <PackagePath>js\inventoryItem.js.map</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\mapItem.js.map">
+      <PackagePath>js\mapItem.js.map</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\player.js.map">
+      <PackagePath>js\player.js.map</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\sound.js.map">
+      <PackagePath>js\sound.js.map</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\sprite.js.map">
+      <PackagePath>js\sprite.js.map</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\world.js.map">
+      <PackagePath>js\world.js.map</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\server\server.js.map">
+      <PackagePath>server\server.js.map</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\WinJS\fonts\Symbols.ttf">
+      <PackagePath>WinJS\fonts\Symbols.ttf</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\bin\Debug\ReverseMap\resources.pri">
+      <PackagePath>resources.pri</PackagePath>
+    </AppxPackagedFile>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+</Project>
