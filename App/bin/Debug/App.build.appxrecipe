@@ -81,6 +81,9 @@
     <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\jquery.min.js">
       <PackagePath>util\jquery.min.js</PackagePath>
     </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\socket.io-1.3.5.js">
+      <PackagePath>util\socket.io-1.3.5.js</PackagePath>
+    </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\underscore-min.js">
       <PackagePath>util\underscore-min.js</PackagePath>
     </AppxPackagedFile>
@@ -92,6 +95,9 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\WinJS\js\ui.js">
       <PackagePath>WinJS\js\ui.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\connect.js">
+      <PackagePath>js\connect.js</PackagePath>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\controls.js">
       <PackagePath>js\controls.js</PackagePath>
@@ -125,6 +131,9 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\underscore-min.map">
       <PackagePath>util\underscore-min.map</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\connect.js.map">
+      <PackagePath>js\connect.js.map</PackagePath>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\controls.js.map">
       <PackagePath>js\controls.js.map</PackagePath>

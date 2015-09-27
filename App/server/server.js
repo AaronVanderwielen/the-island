@@ -32,6 +32,7 @@ var Server = (function () {
         this.init = this.init.bind(this);
     }
     Server.prototype.init = function () {
+        var obj = this;
         // initialize Mongoose schema
         // initialize session middleware
         this.sessionMiddleware = this.Session({
@@ -48,14 +49,15 @@ var Server = (function () {
         this.io = this.Socket(this.server);
         // initialize session storage in mongo and usable in socketio
         this.io.use(function (socket, next) {
-            this.sessionMiddleware(socket.request, socket.request.res, next);
+            obj.sessionMiddleware(socket.request, socket.request.res, next);
         });
         this.app.use(this.sessionMiddleware);
         // socket.io connection
         this.io.on("connection", function (socket) {
             console.log("socket connection " + socket.id);
             var session = socket.request.session;
-            socket.on("test", function (data) {
+            socket.on("fromclient", function (data) {
+                console.log(data);
             });
         });
         this.io.on('disconnect', function () {
@@ -68,7 +70,8 @@ var Server = (function () {
         this.app.set('view engine', 'html');
         this.app.set('views', __dirname + "/views");
         this.app.get('*', function (req, res) {
-            res.status(404).send("404 Not Found");
+            //res.status(404).send("404 Not Found");
+            res.render('default');
         });
         // start server
         this.server.listen(1337);
@@ -76,3 +79,5 @@ var Server = (function () {
     };
     return Server;
 })();
+var server = new Server();
+//# sourceMappingURL=server.js.map

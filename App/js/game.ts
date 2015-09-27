@@ -15,6 +15,7 @@ class Game {
     player: Player;
     world: World;
     sound: Sound;
+    connect: Connect;
     assets: Array<Asset>;
     audioContext;
     currentOsc;
@@ -53,37 +54,83 @@ class Game {
         this.testArray1 = [];
         this.testArray2 = [];
         this.testArray3 = [];
+
+        this.mainMenu();
     }
 
-    setLoadMsg(step: string) {
+    setLoadMsg(step?: string) {
         if (step) {
             $('.load-step').text(step);
         }
         else {
-            $('.load-step').remove();
+            $('#load-screen').remove();
+            $('#canvas').show();
         }
     }
 
+    mainMenu() {
+        var obj = this;
+
+        this.connect = new Connect(function (socket) {
+            var menuControls = new Controls(),
+                menuInterval;
+
+            menuControls.onConnect = function () {
+                $('#main-menu .waiting').hide();
+                $('#main-menu .menu-options').show();
+                menuInterval = window.setInterval(function () {
+                    if (!menuControls) return;
+                    menuControls.report();
+                    for (var a in menuControls.actions) {
+                        var action = menuControls.actions[a];
+                        if (!action.recorded) {
+                            // new action to process
+                            switch (action.button) {
+                                case 0: // a
+                                    window.clearInterval(menuInterval);
+                                    menuControls.clear();
+                                    menuControls = null;
+                                    $('#main-menu').remove();
+                                    $('#load-screen').show();
+                                    obj.init();
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }, 25);
+            };
+            menuControls.onDisconnect = function () {
+                $('#main-menu .menu-options').hide();
+                $('#main-menu .waiting').show();
+                window.clearInterval(menuInterval);
+            };
+            menuControls.start();
+        });
+    }
+
     init() {
-        this.setLoadMsg("Building World...");
-        this.loadAssets(function () {
+        var obj = this;
+
+        obj.setLoadMsg("Building World...");
+        obj.loadAssets(function () {
             var tileset = <HTMLImageElement>this.getAssetById('terrain').value,
                 itemset = <HTMLImageElement>this.getAssetById('items').value;
 
-            this.world = new World(100, 100, 100, 5, tileset, itemset, this.objects);
-            this.sound = new Sound();
+            obj.world = new World(100, 100, 100, 5, tileset, itemset, obj.objects);
+            obj.sound = new Sound();
 
-            this.player = new Player(itemset);
-            this.player.controls = new Controls(this.fps);
-            this.player.sprite = new Sprite(this.getAssetById('char'));
-            this.player.sprite.x = 2000;
-            this.player.sprite.y = 2000;
-            this.player.sprite.sectionId = this.world.getSectionId(2000, 2000, 'p');
-            this.objects.push(this.player.sprite);
+            obj.player = new Player(itemset);
+            obj.player.sprite = new Sprite(obj.getAssetById('char'));
+            obj.player.sprite.x = 2000;
+            obj.player.sprite.y = 2000;
+            obj.player.sprite.sectionId = obj.world.getSectionId(2000, 2000, 'p');
+            obj.objects.push(obj.player.sprite);
 
-            this.setLoadMsg();
-            this.player.controls.start();
-            this.start();
+            obj.setLoadMsg();
+            obj.player.controls.start();
+            obj.startGame();
         });
     }
 
@@ -114,9 +161,8 @@ class Game {
         }
     }
 
-    start() {
+    startGame() {
         var obj = this;
-
         this.monitorInterval(obj.stateUpdate.bind(obj), 15, $('#state-duration'), 'state');
         this.monitorInterval(obj.refresh.bind(obj), (1000 / this.fps), $('#refresh-duration'), 'refresh', true);
     }
@@ -162,6 +208,9 @@ class Game {
                             $('#fps').html('fps: ' + obj.fps);
                             interval = setInterval(monitorFunc, ms);
                         }
+                        else {
+                            $('#fps').html('fps: ' + obj.fps);
+                        }
                     }
                 }
             };
@@ -205,10 +254,10 @@ class Game {
         this.monitorFunction(this.moveViewCenter.bind(this), this.testArray1, $('#draw-view-duration'), 'move view', this.player.sprite);
 
         //this.drawMapObjects.bind(this)
-        this.monitorFunction(this.drawMapObjects.bind(this), this.testArray1, $('#draw-map-objects-duration'), 'map objects');
+        this.monitorFunction(this.drawMapObjects.bind(this), this.testArray2, $('#draw-map-objects-duration'), 'map objects');
 
         //this.player.inventory.draw(this.canvas);
-        //this.monitorFunction(this.player.inventory.draw.bind(this.player.inventory), this.testArray2, $('#draw-inventory-duration'), 'inventory', this.canvas);
+        this.monitorFunction(this.player.inventory.draw.bind(this.player.inventory), this.testArray3, $('#draw-inventory-duration'), 'inventory', this.canvas);
     }
 
     drawMapObjects() {

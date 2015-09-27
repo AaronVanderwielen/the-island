@@ -37,9 +37,7 @@ function start() {
             ready: function (element, options) {
                 if ("getGamepads" in navigator) {
                     var canvas = document.getElementById('canvas'),
-                        game = new Game(canvas, window.innerWidth, window.innerHeight, 60, 60);
-
-                    game.init();
+                        game = new Game(canvas, window.innerWidth, window.innerHeight, 30, 60);
                 }
             }
         });

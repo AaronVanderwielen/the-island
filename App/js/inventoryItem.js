@@ -80,3 +80,4 @@ var InventoryItem = (function () {
     };
     return InventoryItem;
 })();
+//# sourceMappingURL=inventoryItem.js.map

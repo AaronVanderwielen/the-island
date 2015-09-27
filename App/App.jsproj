@@ -80,6 +80,7 @@
     <Content Include="js\default.js" />
     <Content Include="util\createjs-2015.05.21.min.js" />
     <Content Include="util\jquery.min.js" />
+    <Content Include="util\socket.io-1.3.5.js" />
     <Content Include="util\underscore-min.js" />
     <Content Include="util\underscore-min.map" />
     <Content Include="WinJS\css\ui-dark.css" />
@@ -89,6 +90,7 @@
     <Content Include="WinJS\js\base.js" />
     <Content Include="WinJS\js\ui.js" />
     <None Include="App_TemporaryKey.pfx" />
+    <TypeScriptCompile Include="js\connect.ts" />
     <TypeScriptCompile Include="js\controls.ts" />
     <TypeScriptCompile Include="js\game.ts" />
     <TypeScriptCompile Include="js\inventory.ts" />
@@ -110,6 +112,7 @@
     <TypeScriptCompile Include="typescript\node.d.ts" />
     <TypeScriptCompile Include="typescript\preloadjs.d.ts" />
     <TypeScriptCompile Include="typescript\serve-static.d.ts" />
+    <TypeScriptCompile Include="typescript\socket-client.d.ts" />
     <TypeScriptCompile Include="typescript\socket.io.d.ts" />
     <TypeScriptCompile Include="typescript\soundjs.d.ts" />
     <TypeScriptCompile Include="typescript\tweenjs.d.ts" />

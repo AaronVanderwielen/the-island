@@ -1,14 +1,14 @@
 var Controls = (function () {
-    function Controls(fps) {
-        this.fps = fps;
+    function Controls() {
         this.x = 0;
         this.y = 0;
         this.lookx = 0;
         this.looky = 0;
         this.strength = 0;
         this.actions = [];
+        this.hasGp = false;
     }
-    Controls.prototype.report = function (sprite) {
+    Controls.prototype.report = function () {
         var gp = navigator['getGamepads']()[0];
         if (gp) {
             for (var i = 0; i < gp.buttons.length; i++) {
@@ -32,7 +32,7 @@ var Controls = (function () {
                 }
             }
             if (Math.abs(gp.axes[1]) > 0.1 || Math.abs(gp.axes[0]) > 0.1) {
-                var x = gp.axes[0], y = gp.axes[1], c = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)), strength = c < .2 ? 0 : (c < .8 ? 1 : 2);
+                var x = gp.axes[0], y = gp.axes[1], c = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)), strength = c < .2 ? 0 : (c < .8 ? 1 : 1.5);
                 this.x = x;
                 this.y = y;
                 this.strength = strength;
@@ -49,25 +49,40 @@ var Controls = (function () {
         }
     };
     Controls.prototype.start = function () {
-        var obj = this, hasGP = false, repGP;
+        var obj = this;
         $(window).on("gamepadconnected", function () {
             console.log("connection event");
-            repGP = window.setInterval(function () {
-                obj.report.call(obj);
-            }, 1000 / this.fps);
+            if (obj.onConnect) {
+                obj.onConnect();
+            }
         });
         $(window).on("gamepaddisconnected", function () {
             console.log("disconnection event");
-            window.clearInterval(repGP);
-        });
-        //setup an interval for Chrome
-        var checkGP = window.setInterval(function () {
-            if (navigator['getGamepads']()[0]) {
-                if (!hasGP)
-                    $(window).trigger("gamepadconnected");
-                window.clearInterval(checkGP);
+            this.pollForGamepad();
+            if (obj.onDisconnect) {
+                obj.onDisconnect();
             }
-        }, 500);
+        });
+        this.pollForGamepad();
+    };
+    Controls.prototype.pollForGamepad = function () {
+        var obj = this;
+        //setup an interval for Chrome
+        obj.checkGp = window.setInterval(function () {
+            if (navigator['getGamepads']()[0]) {
+                if (!obj.hasGp)
+                    $(window).trigger("gamepadconnected");
+                window.clearInterval(obj.checkGp);
+            }
+        }, 100);
+    };
+    Controls.prototype.clear = function () {
+        this.onConnect = null;
+        this.onDisconnect = null;
+        $(window).off("gamepadconnected");
+        $(window).off("gamepaddisconnected");
+        clearInterval(this.checkGp);
     };
     return Controls;
 })();
+//# sourceMappingURL=controls.js.map

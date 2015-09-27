@@ -4,7 +4,6 @@
 }
 
 class Controls {
-    fps: number;
     x: number;
     y: number;
     lookx: number;
@@ -13,18 +12,22 @@ class Controls {
     sprinting: boolean;
     looking: boolean;
     actions: Array<ButtonAction>;
+    public onConnect: Function;
+    public onDisconnect: Function;
+    checkGp;
+    hasGp: boolean;
 
-    constructor(fps: number) {
-        this.fps = fps;
+    constructor() {
         this.x = 0;
         this.y = 0;
         this.lookx = 0;
         this.looky = 0;
         this.strength = 0;
         this.actions = [];
+        this.hasGp = false;
     }
 
-    report(sprite: Sprite) {
+    report() {
         var gp = navigator['getGamepads']()[0];
         if (gp) {
             for (var i = 0; i < gp.buttons.length; i++) {
@@ -52,7 +55,7 @@ class Controls {
                 var x = gp.axes[0],
                     y = gp.axes[1],
                     c = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)),
-                    strength = c < .2 ? 0 : (c < .8 ? 1 : 2);
+                    strength = c < .2 ? 0 : (c < .8 ? 1 : 1.5);
 
                 this.x = x;
                 this.y = y;
@@ -73,28 +76,45 @@ class Controls {
     }
 
     start() {
-        var obj = this,
-            hasGP = false,
-            repGP;
+        var obj = this;
 
         $(window).on("gamepadconnected", function () {
             console.log("connection event");
-            repGP = window.setInterval(function () {
-                obj.report.call(obj);
-            }, 1000 / this.fps);
+
+            if (obj.onConnect) {
+                obj.onConnect();
+            }
         });
 
         $(window).on("gamepaddisconnected", function () {
             console.log("disconnection event");
-            window.clearInterval(repGP);
+            this.pollForGamepad();
+
+            if (obj.onDisconnect) {
+                obj.onDisconnect();
+            }
         });
 
+        this.pollForGamepad();
+    }
+
+    pollForGamepad() {
+        var obj = this;
+
         //setup an interval for Chrome
-        var checkGP = window.setInterval(function () {
+        obj.checkGp = window.setInterval(function () {
             if (navigator['getGamepads']()[0]) {
-                if (!hasGP) $(window).trigger("gamepadconnected");
-                window.clearInterval(checkGP);
+                if (!obj.hasGp) $(window).trigger("gamepadconnected");
+                window.clearInterval(obj.checkGp);
             }
-        }, 500);
+        }, 100);
+    }
+
+    clear() {
+        this.onConnect = null;
+        this.onDisconnect = null;
+        $(window).off("gamepadconnected");
+        $(window).off("gamepaddisconnected");
+        clearInterval(this.checkGp);
     }
 }

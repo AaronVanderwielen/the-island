@@ -18,9 +18,35 @@ html, body, canvas {
     left: 10px;
 }
 
-.load-step {
+#canvas {
+    display: none;
+}
+
+#load-screen {
+    display: none;
+
+}
+
+#load-screen .load-step {
     position: absolute;
     left: 50%;
     top: 50%;
     color: white;
+}
+
+#main-menu {
+}
+
+#main-menu .menu {
+    position: absolute;
+    top: 50%;
+    left: 30%;
+    font-size: 32px;
+}
+
+#main-menu .menu-options {
+    display: none;
+}
+
+#main-menu .menu-options .start-game {
 }

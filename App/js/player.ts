@@ -5,10 +5,12 @@
 
     constructor(itemset: HTMLImageElement) {
         this.inventory = new Inventory(5, itemset);
+        this.controls = new Controls();
     }
 
     update(game: Game, world: World, sound: Sound) {
         // player can perform action
+        this.controls.report();
         this.processActions(game, world);
         this.sprite.move(this.controls, world, sound);
     }
@@ -71,11 +73,13 @@
                     case 12: // up on d-pad
                         if (this.inventory.active) {
                             this.inventory.focusedHolding = true;
+                            this.inventory.changes = true;
                         }
                         break;
                     case 13: // down on d-pad
                         if (this.inventory.active) {
                             this.inventory.focusedHolding = false;
+                            this.inventory.changes = true;
                         }
                         break;
                     case 14: // left on d-pad
@@ -86,6 +90,7 @@
                             else {
                                 this.inventory.focusedIndex--;
                             }
+                            this.inventory.changes = true;
                         }
                         break;
                     case 15: // right on d-pad
@@ -96,6 +101,7 @@
                             else {
                                 this.inventory.focusedIndex++;
                             }
+                            this.inventory.changes = true;
                         }
                         break;
                 }

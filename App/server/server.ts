@@ -53,6 +53,7 @@
     }
 
     init() {
+        var obj = this;
         // initialize Mongoose schema
 
         // initialize session middleware
@@ -72,7 +73,7 @@
 
         // initialize session storage in mongo and usable in socketio
         this.io.use(function (socket, next) {
-            this.sessionMiddleware(socket.request, socket.request.res, next);
+            obj.sessionMiddleware(socket.request, socket.request.res, next);
         });
         this.app.use(this.sessionMiddleware);
 
@@ -81,7 +82,8 @@
             console.log("socket connection " + socket.id);
             var session = socket.request.session;
 
-            socket.on("test", function (data) {
+            socket.on("fromclient", function (data) {
+                console.log(data);
             });
         });
 
@@ -98,7 +100,8 @@
         this.app.set('views', __dirname + "/views");
 
         this.app.get('*', function (req, res) {
-            res.status(404).send("404 Not Found");
+            //res.status(404).send("404 Not Found");
+            res.render('default');
         });
 
         // start server
@@ -106,3 +109,5 @@
         console.log("Express listening on 1337");
     }
 }
+
+var server = new Server();

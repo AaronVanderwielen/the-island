@@ -7,6 +7,7 @@
     <script type="text/javascript" src="/util/jquery.min.js"></script>
     <script type="text/javascript" src="/util/createjs-2015.05.21.min.js"></script>
     <script type="text/javascript" src="/util/underscore-min.js"></script>
+    <script type="text/javascript" src="/util/socket.io-1.3.5.js"></script>
     <script type="text/javascript" src="/js/controls.js"></script>
     <script type="text/javascript" src="/js/sound.js"></script>
     <script type="text/javascript" src="/js/mapItem.js"></script>
@@ -15,6 +16,7 @@
     <script type="text/javascript" src="/js/inventory.js"></script>
     <script type="text/javascript" src="/js/sprite.js"></script>
     <script type="text/javascript" src="/js/world.js"></script>
+    <script type="text/javascript" src="/js/connect.js"></script>
     <script type="text/javascript" src="/js/game.js"></script>
 
     <!-- WinJS references -->
@@ -39,7 +41,19 @@
         <div id=" draw-map-objects-duration"></div>
         <div id="draw-inventory-duration"></div>
     </div>
-    <div class="load-step"></div>
+    <div id="main-menu">
+        <div class="menu">
+            <div class="waiting">
+                ...waiting for gamepad...
+            </div>
+            <div class="menu-options">
+                <div class="start-game">Start</div>
+            </div>
+        </div>
+    </div>
+    <div id="load-screen">
+        <div class="load-step"></div>
+    </div>
     <canvas id="canvas"></canvas>
 </body>
 </html>

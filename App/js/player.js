@@ -1,9 +1,11 @@
 var Player = (function () {
     function Player(itemset) {
         this.inventory = new Inventory(5, itemset);
+        this.controls = new Controls();
     }
     Player.prototype.update = function (game, world, sound) {
         // player can perform action
+        this.controls.report();
         this.processActions(game, world);
         this.sprite.move(this.controls, world, sound);
     };
@@ -64,11 +66,13 @@ var Player = (function () {
                     case 12:
                         if (this.inventory.active) {
                             this.inventory.focusedHolding = true;
+                            this.inventory.changes = true;
                         }
                         break;
                     case 13:
                         if (this.inventory.active) {
                             this.inventory.focusedHolding = false;
+                            this.inventory.changes = true;
                         }
                         break;
                     case 14:
@@ -79,6 +83,7 @@ var Player = (function () {
                             else {
                                 this.inventory.focusedIndex--;
                             }
+                            this.inventory.changes = true;
                         }
                         break;
                     case 15:
@@ -89,6 +94,7 @@ var Player = (function () {
                             else {
                                 this.inventory.focusedIndex++;
                             }
+                            this.inventory.changes = true;
                         }
                         break;
                 }
@@ -98,3 +104,4 @@ var Player = (function () {
     };
     return Player;
 })();
+//# sourceMappingURL=player.js.map

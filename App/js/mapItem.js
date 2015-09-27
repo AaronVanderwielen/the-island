@@ -322,3 +322,4 @@ var MapItem = (function () {
     };
     return MapItem;
 })();
+//# sourceMappingURL=mapItem.js.map

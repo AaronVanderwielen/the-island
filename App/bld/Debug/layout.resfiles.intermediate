@@ -14,6 +14,8 @@ img\terrain.png
 img\tiles.xcf
 img\tilesetA.png
 img\tilesetA.xcf
+js\connect.js
+js\connect.js.map
 js\controls.js
 js\controls.js.map
 js\default.js
@@ -37,6 +39,7 @@ server\server.js
 server\server.js.map
 util\createjs-2015.05.21.min.js
 util\jquery.min.js
+util\socket.io-1.3.5.js
 util\underscore-min.js
 util\underscore-min.map
 WinJS\css\ui-dark.css

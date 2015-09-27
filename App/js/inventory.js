@@ -22,6 +22,7 @@ var Inventory = (function () {
         // if there was a secondary action (moving items) cancel it
         this.secondaryFocusActive = false;
         this.secondarySelection = null;
+        this.changes = true;
     };
     Inventory.prototype.equip = function (item) {
         var success = false;
@@ -37,6 +38,7 @@ var Inventory = (function () {
                 success = true;
             }
         }
+        this.changes = true;
         return success;
     };
     Inventory.prototype.pickup = function (mItem) {
@@ -53,6 +55,7 @@ var Inventory = (function () {
             numReceived += tryHands;
             stack -= tryHands;
         }
+        this.changes = true;
         return numReceived;
     };
     Inventory.prototype.putInBag = function (item, stack) {
@@ -81,6 +84,7 @@ var Inventory = (function () {
                 }
             }
         }
+        this.changes = true;
         return numReceived;
     };
     Inventory.prototype.putInHands = function (item, stack) {
@@ -103,10 +107,12 @@ var Inventory = (function () {
                 numReceived++;
             }
         }
+        this.changes = true;
         return numReceived;
     };
     Inventory.prototype.moveToBag = function () {
         var success = false;
+        this.changes = true;
         //if (this.holding) {
         //    if (this.putInBag(this.holding)) {
         //        this.holding = null;
@@ -126,11 +132,13 @@ var Inventory = (function () {
         }
         else {
         }
+        this.changes = true;
     };
     // drop from hand
     Inventory.prototype.drop = function (item) {
         var dropped = this.carrying;
         this.carrying = null;
+        this.changes = true;
         return dropped;
     };
     // drop from inventory
@@ -149,6 +157,7 @@ var Inventory = (function () {
                 dropped = new MapItem(this.itemset, null, this.carrying[index], 1);
                 this.carrying[index].stack--;
             }
+            this.changes = true;
         }
         return dropped;
     };
@@ -207,8 +216,10 @@ var Inventory = (function () {
                 }
             }
             this.cached = tempCanvas;
+            this.changes = false;
         }
         ctx.drawImage(this.cached, 0, 0, this.cached.width, this.cached.height, startX, startY, this.cached.width, this.cached.height);
     };
     return Inventory;
 })();
+//# sourceMappingURL=inventory.js.map

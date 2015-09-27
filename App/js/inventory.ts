@@ -41,6 +41,7 @@
         // if there was a secondary action (moving items) cancel it
         this.secondaryFocusActive = false;
         this.secondarySelection = null;
+        this.changes = true;
     }
 
     equip(item: InventoryItem) {
@@ -58,7 +59,7 @@
                 success = true;
             }
         }
-
+        this.changes = true;
         return success;
     }
 
@@ -81,7 +82,7 @@
             numReceived += tryHands;
             stack -= tryHands;
         }
-
+        this.changes = true;
         return numReceived;
     }
 
@@ -112,7 +113,7 @@
                 }
             }
         }
-
+        this.changes = true;
         return numReceived;
     }
 
@@ -138,13 +139,13 @@
                 numReceived++;
             }
         }
-
+        this.changes = true;
         return numReceived;
     }
 
     moveToBag() {
         var success = false;
-
+        this.changes = true;
         //if (this.holding) {
         //    if (this.putInBag(this.holding)) {
         //        this.holding = null;
@@ -170,12 +171,14 @@
         else {
             // nothing currently selected, select current index
         }
+        this.changes = true;
     }
 
     // drop from hand
     drop(item: InventoryItem) {
         var dropped = this.carrying;
         this.carrying = null;
+        this.changes = true;
         return dropped;
     }
 
@@ -195,6 +198,7 @@
                 dropped = new MapItem(this.itemset, null, this.carrying[index], 1);
                 this.carrying[index].stack--;
             }
+            this.changes = true;
         }
         return dropped;
     }
@@ -276,6 +280,7 @@
             }
 
             this.cached = tempCanvas;
+            this.changes = false;
         }
 
         ctx.drawImage(this.cached, 0, 0, this.cached.width, this.cached.height, startX, startY, this.cached.width, this.cached.height);
