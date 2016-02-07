@@ -1,6 +1,0 @@
-C:\Users\Aaron\Projects\GitHub\battleroyale\Game\bin\The Island.dll.config
-C:\Users\Aaron\Projects\GitHub\battleroyale\Game\bin\The Island.dll
-C:\Users\Aaron\Projects\GitHub\battleroyale\Game\bin\The Island.pdb
-C:\Users\Aaron\Projects\GitHub\battleroyale\Game\obj\Debug\The Island.csprojResolveAssemblyReference.cache
-C:\Users\Aaron\Projects\GitHub\battleroyale\Game\obj\Debug\The Island.dll
-C:\Users\Aaron\Projects\GitHub\battleroyale\Game\obj\Debug\The Island.pdb

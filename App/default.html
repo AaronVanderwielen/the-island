@@ -3,21 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <title>App</title>
+
     <link rel="stylesheet" href="/css/app.css" type="text/css" />
-    <script type="text/javascript" src="/util/jquery.min.js"></script>
-    <script type="text/javascript" src="/util/createjs-2015.05.21.min.js"></script>
-    <script type="text/javascript" src="/util/underscore-min.js"></script>
-    <script type="text/javascript" src="/util/socket.io-1.3.5.js"></script>
-    <script type="text/javascript" src="/js/controls.js"></script>
-    <script type="text/javascript" src="/js/sound.js"></script>
-    <script type="text/javascript" src="/js/mapItem.js"></script>
-    <script type="text/javascript" src="/js/player.js"></script>
-    <script type="text/javascript" src="/js/inventoryItem.js"></script>
-    <script type="text/javascript" src="/js/inventory.js"></script>
-    <script type="text/javascript" src="/js/sprite.js"></script>
-    <script type="text/javascript" src="/js/world.js"></script>
-    <script type="text/javascript" src="/js/connect.js"></script>
-    <script type="text/javascript" src="/js/game.js"></script>
 
     <!-- WinJS references -->
     <link href="/WinJS/css/ui-dark.css" rel="stylesheet" />
@@ -26,8 +13,10 @@
 
     <!-- App references -->
     <link href="/css/default.css" rel="stylesheet" />
-    <script src="/js/http.js"></script>
+
+    <script data-main="/js/main" src="/js/util/require.js"></script>
     <script src="/js/default.js"></script>
+
 </head>
 <body class="win-type-body">
     <div id="info">
@@ -38,7 +27,7 @@
         <div id="state-duration"></div>
         <div id="refresh-duration"></div>
         <div id="draw-view-duration"></div>
-        <div id=" draw-map-objects-duration"></div>
+        <div id="draw-map-objects-duration"></div>
         <div id="draw-inventory-duration"></div>
     </div>
     <div id="main-menu">

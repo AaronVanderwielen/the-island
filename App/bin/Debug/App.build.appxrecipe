@@ -72,20 +72,26 @@
     <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\img\tilesetA.xcf">
       <PackagePath>img\tilesetA.xcf</PackagePath>
     </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\main.js">
+      <PackagePath>js\main.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\util\createjs-2015.05.21.min.js">
+      <PackagePath>js\util\createjs-2015.05.21.min.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\util\jquery.min.js">
+      <PackagePath>js\util\jquery.min.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\util\require.js">
+      <PackagePath>js\util\require.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\util\socket.io-1.3.5.js">
+      <PackagePath>js\util\socket.io-1.3.5.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\util\underscore-min.js">
+      <PackagePath>js\util\underscore-min.js</PackagePath>
+    </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\default.js">
       <PackagePath>js\default.js</PackagePath>
-    </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\createjs-2015.05.21.min.js">
-      <PackagePath>util\createjs-2015.05.21.min.js</PackagePath>
-    </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\jquery.min.js">
-      <PackagePath>util\jquery.min.js</PackagePath>
-    </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\socket.io-1.3.5.js">
-      <PackagePath>util\socket.io-1.3.5.js</PackagePath>
-    </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\underscore-min.js">
-      <PackagePath>util\underscore-min.js</PackagePath>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\WinJS\js\en-US\ui.strings.js">
       <PackagePath>WinJS\js\en-US\ui.strings.js</PackagePath>
@@ -96,74 +102,86 @@
     <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\WinJS\js\ui.js">
       <PackagePath>WinJS\js\ui.js</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\connect.js">
-      <PackagePath>js\connect.js</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\account.js">
+      <PackagePath>js\game\account.js</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\controls.js">
-      <PackagePath>js\controls.js</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\controls.js">
+      <PackagePath>js\game\controls.js</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game.js">
-      <PackagePath>js\game.js</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\gameServer.js">
+      <PackagePath>js\game\gameServer.js</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\inventory.js">
-      <PackagePath>js\inventory.js</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\inventory.js">
+      <PackagePath>js\game\inventory.js</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\inventoryItem.js">
-      <PackagePath>js\inventoryItem.js</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\lib.js">
+      <PackagePath>js\game\lib.js</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\mapItem.js">
-      <PackagePath>js\mapItem.js</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\map.js">
+      <PackagePath>js\game\map.js</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\player.js">
-      <PackagePath>js\player.js</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\mapObject.js">
+      <PackagePath>js\game\mapObject.js</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\sound.js">
-      <PackagePath>js\sound.js</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\player.js">
+      <PackagePath>js\game\player.js</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\sprite.js">
-      <PackagePath>js\sprite.js</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\render.js">
+      <PackagePath>js\game\render.js</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\world.js">
-      <PackagePath>js\world.js</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\server.js">
+      <PackagePath>js\game\server.js</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\server\server.js">
-      <PackagePath>server\server.js</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\sprite.js">
+      <PackagePath>js\game\sprite.js</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\underscore-min.map">
-      <PackagePath>util\underscore-min.map</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\start.js">
+      <PackagePath>js\game\start.js</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\connect.js.map">
-      <PackagePath>js\connect.js.map</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\worldbuilder.js">
+      <PackagePath>js\game\worldbuilder.js</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\controls.js.map">
-      <PackagePath>js\controls.js.map</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\util\underscore-min.map">
+      <PackagePath>js\util\underscore-min.map</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game.js.map">
-      <PackagePath>js\game.js.map</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\account.js.map">
+      <PackagePath>js\game\account.js.map</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\inventory.js.map">
-      <PackagePath>js\inventory.js.map</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\controls.js.map">
+      <PackagePath>js\game\controls.js.map</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\inventoryItem.js.map">
-      <PackagePath>js\inventoryItem.js.map</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\gameServer.js.map">
+      <PackagePath>js\game\gameServer.js.map</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\mapItem.js.map">
-      <PackagePath>js\mapItem.js.map</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\inventory.js.map">
+      <PackagePath>js\game\inventory.js.map</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\player.js.map">
-      <PackagePath>js\player.js.map</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\lib.js.map">
+      <PackagePath>js\game\lib.js.map</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\sound.js.map">
-      <PackagePath>js\sound.js.map</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\map.js.map">
+      <PackagePath>js\game\map.js.map</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\sprite.js.map">
-      <PackagePath>js\sprite.js.map</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\mapObject.js.map">
+      <PackagePath>js\game\mapObject.js.map</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\world.js.map">
-      <PackagePath>js\world.js.map</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\player.js.map">
+      <PackagePath>js\game\player.js.map</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\server\server.js.map">
-      <PackagePath>server\server.js.map</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\render.js.map">
+      <PackagePath>js\game\render.js.map</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\server.js.map">
+      <PackagePath>js\game\server.js.map</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\sprite.js.map">
+      <PackagePath>js\game\sprite.js.map</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\start.js.map">
+      <PackagePath>js\game\start.js.map</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\worldbuilder.js.map">
+      <PackagePath>js\game\worldbuilder.js.map</PackagePath>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\WinJS\fonts\Symbols.ttf">
       <PackagePath>WinJS\fonts\Symbols.ttf</PackagePath>

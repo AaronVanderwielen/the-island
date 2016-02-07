@@ -10,7 +10,7 @@
     <PackageArchitecture>neutral</PackageArchitecture>
     <PackageIdentityName>01359952-f3b4-4e0f-950b-be439b73bcb5</PackageIdentityName>
     <IntermediateOutputPath>C:\Users\Aaron\Projects\GitHub\battleroyale\App\bld\Debug\</IntermediateOutputPath>
-    <RegisteredManifestChecksum>B7CFAF40DE4084D75AAFAF840150FC729662094E891441A7EBC43FEFF84730E3</RegisteredManifestChecksum>
+    <RegisteredManifestChecksum>1CB52E9DCF0FA2B953ED83D010F940A34156DAD0E5C1A47FAD622F9289176F04</RegisteredManifestChecksum>
     <RegisteredPackageMoniker>01359952-f3b4-4e0f-950b-be439b73bcb5_1.0.0.0_neutral__jq6xpzdywz9kj</RegisteredPackageMoniker>
     <RegisteredUserModeAppID>01359952-f3b4-4e0f-950b-be439b73bcb5_jq6xpzdywz9kj!App</RegisteredUserModeAppID>
     <RegisteredPackageID>01359952-f3b4-4e0f-950b-be439b73bcb5</RegisteredPackageID>
@@ -22,7 +22,7 @@
     <AppXManifest Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\bin\Debug\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2015-09-27T20:43:52.763</Modified>
+      <Modified>2016-02-07T19:00:17.512</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
@@ -40,7 +40,7 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\default.html">
       <PackagePath>default.html</PackagePath>
-      <Modified>2015-09-27T21:12:15.907</Modified>
+      <Modified>2016-01-17T01:17:33.365</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\images\LockScreenLogo.scale-200.png">
       <PackagePath>images\LockScreenLogo.scale-200.png</PackagePath>
@@ -98,25 +98,33 @@
       <PackagePath>img\tilesetA.xcf</PackagePath>
       <Modified>2015-05-30T17:49:48.676</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\default.js">
-      <PackagePath>js\default.js</PackagePath>
-      <Modified>2015-09-27T20:45:19.256</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\main.js">
+      <PackagePath>js\main.js</PackagePath>
+      <Modified>2016-01-17T01:13:34.366</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\createjs-2015.05.21.min.js">
-      <PackagePath>util\createjs-2015.05.21.min.js</PackagePath>
-      <Modified>2015-09-07T20:05:35.068</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\util\createjs-2015.05.21.min.js">
+      <PackagePath>js\util\createjs-2015.05.21.min.js</PackagePath>
+      <Modified>2016-01-17T01:19:45.964</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\jquery.min.js">
-      <PackagePath>util\jquery.min.js</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\util\jquery.min.js">
+      <PackagePath>js\util\jquery.min.js</PackagePath>
       <Modified>2015-09-07T20:06:24.117</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\socket.io-1.3.5.js">
-      <PackagePath>util\socket.io-1.3.5.js</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\util\require.js">
+      <PackagePath>js\util\require.js</PackagePath>
+      <Modified>2015-12-12T23:47:20.163</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\util\socket.io-1.3.5.js">
+      <PackagePath>js\util\socket.io-1.3.5.js</PackagePath>
       <Modified>2015-09-27T19:26:33.583</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\underscore-min.js">
-      <PackagePath>util\underscore-min.js</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\util\underscore-min.js">
+      <PackagePath>js\util\underscore-min.js</PackagePath>
       <Modified>2015-01-11T18:30:14.996</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\default.js">
+      <PackagePath>js\default.js</PackagePath>
+      <Modified>2016-01-17T01:21:55.031</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\WinJS\js\en-US\ui.strings.js">
       <PackagePath>WinJS\js\en-US\ui.strings.js</PackagePath>
@@ -130,97 +138,113 @@
       <PackagePath>WinJS\js\ui.js</PackagePath>
       <Modified>2015-06-24T06:36:40.000</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\connect.js">
-      <PackagePath>js\connect.js</PackagePath>
-      <Modified>2015-09-27T21:16:49.373</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\account.js">
+      <PackagePath>js\game\account.js</PackagePath>
+      <Modified>2016-02-07T20:28:15.788</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\controls.js">
-      <PackagePath>js\controls.js</PackagePath>
-      <Modified>2015-09-27T21:16:49.384</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\controls.js">
+      <PackagePath>js\game\controls.js</PackagePath>
+      <Modified>2016-02-07T20:28:15.808</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game.js">
-      <PackagePath>js\game.js</PackagePath>
-      <Modified>2015-09-27T21:16:49.405</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\gameServer.js">
+      <PackagePath>js\game\gameServer.js</PackagePath>
+      <Modified>2016-02-07T20:28:15.912</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\inventory.js">
-      <PackagePath>js\inventory.js</PackagePath>
-      <Modified>2015-09-27T21:16:49.420</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\inventory.js">
+      <PackagePath>js\game\inventory.js</PackagePath>
+      <Modified>2016-02-07T20:28:15.880</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\inventoryItem.js">
-      <PackagePath>js\inventoryItem.js</PackagePath>
-      <Modified>2015-09-27T21:16:49.426</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\lib.js">
+      <PackagePath>js\game\lib.js</PackagePath>
+      <Modified>2016-02-07T20:28:15.810</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\mapItem.js">
-      <PackagePath>js\mapItem.js</PackagePath>
-      <Modified>2015-09-27T21:16:49.443</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\map.js">
+      <PackagePath>js\game\map.js</PackagePath>
+      <Modified>2016-02-07T20:28:15.823</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\player.js">
-      <PackagePath>js\player.js</PackagePath>
-      <Modified>2015-09-27T21:16:49.448</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\mapObject.js">
+      <PackagePath>js\game\mapObject.js</PackagePath>
+      <Modified>2016-02-07T20:28:15.866</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\sound.js">
-      <PackagePath>js\sound.js</PackagePath>
-      <Modified>2015-09-27T21:16:49.451</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\player.js">
+      <PackagePath>js\game\player.js</PackagePath>
+      <Modified>2016-02-07T20:28:15.908</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\sprite.js">
-      <PackagePath>js\sprite.js</PackagePath>
-      <Modified>2015-09-27T21:16:49.462</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\render.js">
+      <PackagePath>js\game\render.js</PackagePath>
+      <Modified>2016-02-07T20:28:15.929</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\world.js">
-      <PackagePath>js\world.js</PackagePath>
-      <Modified>2015-09-27T21:16:49.503</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\server.js">
+      <PackagePath>js\game\server.js</PackagePath>
+      <Modified>2016-02-07T20:28:15.933</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\server\server.js">
-      <PackagePath>server\server.js</PackagePath>
-      <Modified>2015-09-27T21:16:49.508</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\sprite.js">
+      <PackagePath>js\game\sprite.js</PackagePath>
+      <Modified>2016-02-07T20:28:15.883</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\util\underscore-min.map">
-      <PackagePath>util\underscore-min.map</PackagePath>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\start.js">
+      <PackagePath>js\game\start.js</PackagePath>
+      <Modified>2016-02-07T20:28:15.936</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\worldbuilder.js">
+      <PackagePath>js\game\worldbuilder.js</PackagePath>
+      <Modified>2016-02-07T20:28:15.850</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\util\underscore-min.map">
+      <PackagePath>js\util\underscore-min.map</PackagePath>
       <Modified>2015-01-11T18:30:16.570</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\connect.js.map">
-      <PackagePath>js\connect.js.map</PackagePath>
-      <Modified>2015-09-27T21:16:49.372</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\account.js.map">
+      <PackagePath>js\game\account.js.map</PackagePath>
+      <Modified>2016-02-07T20:28:15.788</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\controls.js.map">
-      <PackagePath>js\controls.js.map</PackagePath>
-      <Modified>2015-09-27T21:16:49.383</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\controls.js.map">
+      <PackagePath>js\game\controls.js.map</PackagePath>
+      <Modified>2016-02-07T20:28:15.807</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game.js.map">
-      <PackagePath>js\game.js.map</PackagePath>
-      <Modified>2015-09-27T21:16:49.401</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\gameServer.js.map">
+      <PackagePath>js\game\gameServer.js.map</PackagePath>
+      <Modified>2016-02-07T20:28:15.912</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\inventory.js.map">
-      <PackagePath>js\inventory.js.map</PackagePath>
-      <Modified>2015-09-27T21:16:49.416</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\inventory.js.map">
+      <PackagePath>js\game\inventory.js.map</PackagePath>
+      <Modified>2016-02-07T20:28:15.875</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\inventoryItem.js.map">
-      <PackagePath>js\inventoryItem.js.map</PackagePath>
-      <Modified>2015-09-27T21:16:49.425</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\lib.js.map">
+      <PackagePath>js\game\lib.js.map</PackagePath>
+      <Modified>2016-02-07T20:28:15.810</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\mapItem.js.map">
-      <PackagePath>js\mapItem.js.map</PackagePath>
-      <Modified>2015-09-27T21:16:49.439</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\map.js.map">
+      <PackagePath>js\game\map.js.map</PackagePath>
+      <Modified>2016-02-07T20:28:15.822</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\player.js.map">
-      <PackagePath>js\player.js.map</PackagePath>
-      <Modified>2015-09-27T21:16:49.447</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\mapObject.js.map">
+      <PackagePath>js\game\mapObject.js.map</PackagePath>
+      <Modified>2016-02-07T20:28:15.860</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\sound.js.map">
-      <PackagePath>js\sound.js.map</PackagePath>
-      <Modified>2015-09-27T21:16:49.450</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\player.js.map">
+      <PackagePath>js\game\player.js.map</PackagePath>
+      <Modified>2016-02-07T20:28:15.903</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\sprite.js.map">
-      <PackagePath>js\sprite.js.map</PackagePath>
-      <Modified>2015-09-27T21:16:49.461</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\render.js.map">
+      <PackagePath>js\game\render.js.map</PackagePath>
+      <Modified>2016-02-07T20:28:15.924</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\world.js.map">
-      <PackagePath>js\world.js.map</PackagePath>
-      <Modified>2015-09-27T21:16:49.497</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\server.js.map">
+      <PackagePath>js\game\server.js.map</PackagePath>
+      <Modified>2016-02-07T20:28:15.932</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\server\server.js.map">
-      <PackagePath>server\server.js.map</PackagePath>
-      <Modified>2015-09-27T21:16:49.507</Modified>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\sprite.js.map">
+      <PackagePath>js\game\sprite.js.map</PackagePath>
+      <Modified>2016-02-07T20:28:15.882</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\start.js.map">
+      <PackagePath>js\game\start.js.map</PackagePath>
+      <Modified>2016-02-07T20:28:15.935</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\js\game\worldbuilder.js.map">
+      <PackagePath>js\game\worldbuilder.js.map</PackagePath>
+      <Modified>2016-02-07T20:28:15.845</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\WinJS\fonts\Symbols.ttf">
       <PackagePath>WinJS\fonts\Symbols.ttf</PackagePath>
@@ -228,7 +252,7 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Aaron\Projects\GitHub\battleroyale\App\bin\Debug\ReverseMap\resources.pri">
       <PackagePath>resources.pri</PackagePath>
-      <Modified>2015-09-27T20:43:52.648</Modified>
+      <Modified>2016-02-07T19:00:17.463</Modified>
     </AppxPackagedFile>
   </ItemGroup>
   <ItemGroup>

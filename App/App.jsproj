@@ -42,6 +42,12 @@
     <ProjectGuid>01359952-f3b4-4e0f-950b-be439b73bcb5</ProjectGuid>
     <TypeScriptToolsVersion>1.5</TypeScriptToolsVersion>
   </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)' == 'Debug'">
+    <TypeScriptModuleKind>amd</TypeScriptModuleKind>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)' == 'Release'">
+    <TypeScriptModuleKind>amd</TypeScriptModuleKind>
+  </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup Condition="'$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0'">
     <VisualStudioVersion>14.0</VisualStudioVersion>
@@ -77,12 +83,14 @@
     <Content Include="img\tiles.xcf" />
     <Content Include="img\tilesetA.png" />
     <Content Include="img\tilesetA.xcf" />
+    <Content Include="js\main.js" />
+    <Content Include="js\util\createjs-2015.05.21.min.js" />
+    <Content Include="js\util\jquery.min.js" />
+    <Content Include="js\util\require.js" />
+    <Content Include="js\util\socket.io-1.3.5.js" />
+    <Content Include="js\util\underscore-min.js" />
+    <Content Include="js\util\underscore-min.map" />
     <Content Include="js\default.js" />
-    <Content Include="util\createjs-2015.05.21.min.js" />
-    <Content Include="util\jquery.min.js" />
-    <Content Include="util\socket.io-1.3.5.js" />
-    <Content Include="util\underscore-min.js" />
-    <Content Include="util\underscore-min.map" />
     <Content Include="WinJS\css\ui-dark.css" />
     <Content Include="WinJS\css\ui-light.css" />
     <Content Include="WinJS\fonts\Symbols.ttf" />
@@ -90,33 +98,35 @@
     <Content Include="WinJS\js\base.js" />
     <Content Include="WinJS\js\ui.js" />
     <None Include="App_TemporaryKey.pfx" />
-    <TypeScriptCompile Include="js\connect.ts" />
-    <TypeScriptCompile Include="js\controls.ts" />
-    <TypeScriptCompile Include="js\game.ts" />
-    <TypeScriptCompile Include="js\inventory.ts" />
-    <TypeScriptCompile Include="js\inventoryItem.ts" />
-    <TypeScriptCompile Include="js\mapItem.ts" />
-    <TypeScriptCompile Include="js\player.ts" />
-    <TypeScriptCompile Include="js\sound.ts" />
-    <TypeScriptCompile Include="js\sprite.ts" />
-    <TypeScriptCompile Include="js\world.ts" />
-    <TypeScriptCompile Include="server\server.ts" />
-    <TypeScriptCompile Include="typescript\createjs-lib.d.ts" />
-    <TypeScriptCompile Include="typescript\easeljs.d.ts" />
-    <TypeScriptCompile Include="typescript\express.d.ts" />
-    <TypeScriptCompile Include="typescript\jquery.d.ts" />
-    <TypeScriptCompile Include="typescript\MediaStream.d.ts" />
-    <TypeScriptCompile Include="typescript\mime.d.ts" />
-    <TypeScriptCompile Include="typescript\mongodb.d.ts" />
-    <TypeScriptCompile Include="typescript\mongoose.d.ts" />
-    <TypeScriptCompile Include="typescript\node.d.ts" />
-    <TypeScriptCompile Include="typescript\preloadjs.d.ts" />
-    <TypeScriptCompile Include="typescript\serve-static.d.ts" />
-    <TypeScriptCompile Include="typescript\socket-client.d.ts" />
-    <TypeScriptCompile Include="typescript\socket.io.d.ts" />
-    <TypeScriptCompile Include="typescript\soundjs.d.ts" />
-    <TypeScriptCompile Include="typescript\tweenjs.d.ts" />
-    <TypeScriptCompile Include="typescript\underscore.d.ts" />
+    <TypeScriptCompile Include="js\game\account.ts" />
+    <TypeScriptCompile Include="js\game\controls.ts" />
+    <TypeScriptCompile Include="js\game\gameServer.ts" />
+    <TypeScriptCompile Include="js\game\inventory.ts" />
+    <TypeScriptCompile Include="js\game\lib.ts" />
+    <TypeScriptCompile Include="js\game\map.ts" />
+    <TypeScriptCompile Include="js\game\mapObject.ts" />
+    <TypeScriptCompile Include="js\game\player.ts" />
+    <TypeScriptCompile Include="js\game\render.ts" />
+    <TypeScriptCompile Include="js\game\server.ts" />
+    <TypeScriptCompile Include="js\game\sprite.ts" />
+    <TypeScriptCompile Include="js\game\start.ts" />
+    <TypeScriptCompile Include="js\game\worldbuilder.ts" />
+    <TypeScriptCompile Include="js\typescript\createjs-lib.d.ts" />
+    <TypeScriptCompile Include="js\typescript\easeljs.d.ts" />
+    <TypeScriptCompile Include="js\typescript\express.d.ts" />
+    <TypeScriptCompile Include="js\typescript\jquery.d.ts" />
+    <TypeScriptCompile Include="js\typescript\MediaStream.d.ts" />
+    <TypeScriptCompile Include="js\typescript\mime.d.ts" />
+    <TypeScriptCompile Include="js\typescript\mongodb.d.ts" />
+    <TypeScriptCompile Include="js\typescript\mongoose.d.ts" />
+    <TypeScriptCompile Include="js\typescript\node.d.ts" />
+    <TypeScriptCompile Include="js\typescript\preloadjs.d.ts" />
+    <TypeScriptCompile Include="js\typescript\serve-static.d.ts" />
+    <TypeScriptCompile Include="js\typescript\socket-client.d.ts" />
+    <TypeScriptCompile Include="js\typescript\socket.io.d.ts" />
+    <TypeScriptCompile Include="js\typescript\soundjs.d.ts" />
+    <TypeScriptCompile Include="js\typescript\tweenjs.d.ts" />
+    <TypeScriptCompile Include="js\typescript\underscore.d.ts" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4a0dddb5-7a95-4fbf-97cc-616d07737a77}" />
